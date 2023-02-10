@@ -65,7 +65,7 @@ Lastly, to set the kernel run:
 python -m ipykernel install --user --name dst --display-name "Python (dst)"
 ```
 
-To open the notebook, type:
+To open jupyter notebook, switch back to the environment in which jupyter is installed and type:
 
 ```bash
 jupyter notebook
