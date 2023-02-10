@@ -1,0 +1,23 @@
+name: dst
+channels:
+  - default
+  - rdkit
+  - conda-forge
+dependencies:
+  - more-itertools
+  - pip
+  - python
+  - scikit-learn
+  - scipy
+  - setuptools
+  - pip:
+    - ipykernel
+    - ipython
+    - matplotlib
+    - numpy
+    - pandas
+    - pyyaml
+    - rdkit
+    - sklearn
+    - xlsxwriter
+    - tqdm
