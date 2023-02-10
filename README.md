@@ -84,7 +84,7 @@ TODO
 
 The dst_evidence_combinator was produced at the PharmacoInformatics lab (http://phi.upf.edu), in the framework of the eTRANSAFE project (http://etransafe.eu). eTRANSAFE has received support from IMI2 Joint Undertaking under Grant Agreement No. 777365. This Joint Undertaking receives support from the European Union’s Horizon 2020 research and innovation programme and the European Federation of Pharmaceutical Industries and Associations (EFPIA). Moreover, the project received funding from the European Union’s Horizon 2020 Research and Innovation programme under Grant Agreement No. 964537 (RISK-HUNT3R), which is part of the ASPIS cluster.
 
-Copyright 2023 Manuel Pastor (karolinaweronika.kopanska@upf.edu)
+Copyright 2023 Karolina Kopanska & Manuel Pastor (karolinaweronika.kopanska@upf.edu / manuel.pastor@upf.edu)
 
 The dst_evidence_combinator is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License as published by the Free Software Foundation version 3**.
 
