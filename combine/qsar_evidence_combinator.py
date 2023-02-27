@@ -460,27 +460,27 @@ class QSAR_Evidence_Combinator:
                 print('ERROR - Wrong assignment of rule, please correct!')
 
             # continue with the info from above!
-            if rule is None:
+            if self.rule is None:
 
                 result = pd.DataFrame([combination_dempster,combination_yager]) ### leave out Inagaki for now
                 if i == 0:
                     print("INFO - No rule selected, combining evidence using all rules...")
 
-            elif rule == "Dempster":
+            elif self.rule == "Dempster":
 
                 result = pd.DataFrame([combination_dempster])
 
                 if rule_selection_info is not None and i == 0:
                     print(rule_selection_info)
 
-            elif rule == "Yager":
+            elif self.rule == "Yager":
 
                 result = pd.DataFrame([combination_yager])
 
                 if rule_selection_info is not None and i == 0:
                     print(rule_selection_info)
 
-            elif rule == "Inagaki":
+            elif self.rule == "Inagaki":
 
                 result = pd.DataFrame([combination_inagaki])
 
@@ -488,7 +488,7 @@ class QSAR_Evidence_Combinator:
                     print(rule_selection_info)
 
             self.results[key] = result
-            self.rules[key] = rule
+            self.rules[key] = self.rule
 
             i += 1
     

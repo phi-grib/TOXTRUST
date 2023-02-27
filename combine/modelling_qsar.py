@@ -20,6 +20,7 @@ class QSAR:
         
         self.training = PandasTools.LoadSDF(os.path.join(RDConfig.RDDataDir, path_training_series),molColName='molecule', includeFingerprints=True)
         self.training.dropna(subset=['molecule'], inplace=True)
+        self.training.result = self.training.result.astype('int')
     
 
     def compute_descriptors(self, descriptors, series='training'):    # selection from ['MolecularDescriptors', 'MorganFingerprints'] and ['training','test']
@@ -27,7 +28,7 @@ class QSAR:
         """ Function conserts molecules from the SDfile into descriptors for ML. """
         # TODO: add other descriptor options, properties, rdkit fingerprints etc
 
-        methods = {'MolecularDescriptors': self.md, 'MorganFingerprints': self.fp}
+        methods = {'MolecularDescriptors': self.md, 'PhysChemProperties': self.properties, 'MorganFingerprints': self.fp}
 
         print(f'INFO - Computing {descriptors} for uploaded {series} dataset...')
 
@@ -53,6 +54,26 @@ class QSAR:
         except Exception:
             self.scaler = StandardScaler()
             scaled = pd.DataFrame(self.scaler.fit_transform(calculated_descriptors), columns=names)
+
+        nan_index = scaled[scaled.isnull().any(axis=1)].index.to_list()
+
+        scaled.drop(nan_index, inplace = True)
+        df.drop(nan_index, inplace = True)
+
+        return scaled
+    
+    def properties(self, df):
+        
+        properties = rdMolDescriptors.Properties()
+        properties_names = list(properties.GetPropertyNames())
+
+        calculated_properties = [properties.ComputeProperties(mol) for mol in tqdm(df['molecule'])]
+    
+        try:
+            scaled = pd.DataFrame(self.scaler.transform(calculated_properties), columns=properties_names)
+        except Exception:
+            self.scaler = StandardScaler()
+            scaled = pd.DataFrame(self.scaler.fit_transform(calculated_properties), columns=properties_names)
 
         nan_index = scaled[scaled.isnull().any(axis=1)].index.to_list()
 
