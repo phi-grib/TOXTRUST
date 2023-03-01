@@ -452,7 +452,7 @@ class QSAR_Evidence_Combinator:
                 if rule_selection == 'auto':
                     if i == 0:
                         print("INFO - Automatised rule selection...")
-                    rule, rule_selection_info = self.automatised_rule_selector(df)
+                    self.rule, rule_selection_info = self.automatised_rule_selector(df)
 
                 elif (rule_selection in ['Dempster', 'Yager', 'Inagaki'] or rule_selection is None):
                     self.rule, rule_selection_info = rule_selection, None

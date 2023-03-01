@@ -208,7 +208,7 @@ class Single_Evidence:
             
         print(f'Evidence identified as {self.identifier} of type {self.source.lower()} suggests that that the result is', self.decision.lower(),'!')
 
-class Evidece_Combinator:
+class Evidence_Combinator:
     
     def __init__(self, endpoint): 
 
