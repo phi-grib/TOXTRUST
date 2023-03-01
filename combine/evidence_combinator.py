@@ -12,7 +12,7 @@ import os
 
 class Single_Evidence:
     
-    def __init__(self, identifier, source, result, reliability, relevance, weight=1):
+    def __init__(self, identifier, source, result, reliability, relevance='certain', weight=1):
         
         """ Initiation of Single_Evidence class collecting the most important infomation associated with evidence sources and the results they provide. """
         
