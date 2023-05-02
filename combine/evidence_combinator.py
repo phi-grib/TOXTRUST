@@ -363,7 +363,6 @@ class Evidence_Combinator:
         gpm_con = 1 - (gpm_pos + gpm_neg + gpm_unc)
 
 
-
         print("INFO - Combining evidence...")
 
         k_dempster = 1 - gpm_con
@@ -374,8 +373,8 @@ class Evidence_Combinator:
         combination_yager = np.array([gpm_neg, unc_yager, gpm_pos])
 
         c = (1 / (1 - gpm_unc - gpm_con)) * scale_c_inagaki
-        combination_inagaki = np.array([gpm_neg * (1 + c * gpm_con), gpm_unc * (1 + c * gpm_con) + gpm_unc * (1 + c * gpm_con - c), gpm_pos * (1 + c * gpm_con)])
-
+        combination_inagaki = np.array([gpm_neg * (1 + c * gpm_con), (1 + c * gpm_con) * (gpm_unc + gpm_con ) - c * gpm_con, gpm_pos * (1 + c * gpm_con)])
+        
         # check if rule selection automatic or not, if not --> assign the rule to the selected one or none
 
         try:
