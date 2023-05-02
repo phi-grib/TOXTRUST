@@ -324,7 +324,7 @@ class Evidence_Combinator:
         return rule, comment
     
     
-    def combination(self, rule_selection = None, WoE = False):    # rule_selection from ['Dempster', 'Yager', 'Inagaki','auto'] or None
+    def combination(self, rule_selection = None, scale_c_inagaki = 1, WoE = False):    # rule_selection from ['Dempster', 'Yager', 'Inagaki','auto'] or None
 
         """ This function combines evidence using rules based on the Dempster-Shafer theory. The rule_selection options are: 'Dempster', 'Yager', 'Inagaki','auto', if None, all rules will be included in the output. """ 
         
@@ -359,25 +359,25 @@ class Evidence_Combinator:
 
         gpm_pos = self.collect(df_gpm, iterations_p)
         gpm_neg = self.collect(df_gpm, iterations_n)
-        gpm_con = self.collect(df_gpm, iterations_u)
-
         gpm_unc = df_gpm['U'].prod()
+        gpm_con = 1 - (gpm_pos + gpm_neg + gpm_unc)
 
-        res = gpm_con + gpm_unc
+
 
         print("INFO - Combining evidence...")
 
-        k_dempster = gpm_pos + gpm_neg + gpm_unc
+        k_dempster = 1 - gpm_con
         combination_dempster = np.array([gpm_neg/k_dempster, gpm_unc/k_dempster, gpm_pos/k_dempster])
 
 
-        k_yager = 1 - gpm_pos - gpm_neg
-        combination_yager = np.array([gpm_neg, k_yager, gpm_pos])
+        unc_yager = 1 - gpm_pos - gpm_neg
+        combination_yager = np.array([gpm_neg, unc_yager, gpm_pos])
 
-        combination_inagaki = np.array([np.nan, np.nan, np.nan])
+        c = (1 / (1 - gpm_unc - gpm_con)) * scale_c_inagaki
+        combination_inagaki = np.array([gpm_neg * (1 + c * gpm_con), gpm_unc * (1 + c * gpm_con) + gpm_unc * (1 + c * gpm_con - c), gpm_pos * (1 + c * gpm_con)])
 
         # check if rule selection automatic or not, if not --> assign the rule to the selected one or none
-        
+
         try:
 
             if rule_selection == 'auto':
@@ -396,7 +396,7 @@ class Evidence_Combinator:
 
             self.results['Dempster'] = combination_dempster 
             self.results['Yager'] = combination_yager
-            self.results['Inagaki'] = combination_dempster #combination_inagaki
+            self.results['Inagaki'] = combination_inagaki 
 
         elif self.rule == 'Dempster':
 
@@ -414,7 +414,7 @@ class Evidence_Combinator:
 
         elif self.rule == 'Inagaki':
 
-            self.results['Inagaki'] = combination_dempster #combination_inagaki
+            self.results['Inagaki'] = combination_inagaki 
 
             if rule_selection_info is not None:
                 print(rule_selection_info)
@@ -537,5 +537,4 @@ class Evidence_Combinator:
         print(f'INFO - The collected evidence suggests that that the result is {self.decision.lower()}','!')
         
         
-        
-        
+### add belief and plausibility for combination... 
