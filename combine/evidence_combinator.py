@@ -318,7 +318,7 @@ class Evidence_Combinator:
                 rule = 'Yager'
                 comment = 'INFO - Choosing Yager\'s rule: Agreement between sources, but uncertainty threshold exceeded.'
         else: 
-            rule = 'Dempster' ######'Inagaki' but the rule doesnt work yet because of the formula
+            rule = 'Inagaki' ######'Inagaki' but the rule doesnt work yet because of the formula
             comment = 'INFO - Choosing Inagaki\'s rule: No agreement between sources.'
             
         return rule, comment
@@ -335,7 +335,7 @@ class Evidence_Combinator:
         except Exception:
             print("\nINFO - Running evidence combination...")
 
-        df = self.return_results('BPA').copy()
+        df = self.return_results('bpa').copy()
 
         if WoE:
 
