@@ -71,13 +71,34 @@ To open jupyter notebook, switch back to the environment in which jupyter is ins
 jupyter notebook
 ```
 
-## Main features
+## How does it work?
 
-TODO
+The code for evidence processing and combination as well as the list of required libraries are stored in the combine-subpackage, which must be loaded first. Then, each piece of information derived from an independent body of evidence is handled separately by the “Single_Evidence” class. The initiation of this class required providing the following information:
 
-- Processing of qsar predicions / toxicological evidence pieces of different types. The single evidence classes require user input that is later translated into basic probability masses, and the degrees of Belief and Plausibility.
+* Identifier
+The Identifier is the unique name that will be used further to refer to each particular instance of the “Single_Evidence” class.
 
-- Combining evidence using DST based rules. The evidence combinator classes process the collected evidence in a user-defined way. Elements like Weight of Evidence and .... can be considered. 
+*	Source
+The Source refers to the origin of the data, including the following options: “expert”, “QSAR”, “in vitro”, “positive alert”, “negative alert”, whereby the distinction between positive and negative alerts is essential for the correct processing of the provided data. 
+
+*	Result 
+The Result parameter represents the experimental value derived from the evidence body. It can be used in a singular form (one value) or binary form (two values). While for the singular form, scale allows to use one value, always referring to the positive result, indicating percent (0 to 100) or point percent (0 to 1), or a binary outcome (0 or 1), the binary form additionally requires the provided values to sum to 1. 
+
+*	Reliability 
+Reliability score associated with the evidence body. Provided in the form of a dictionary or a list with two values, the first always being the score associated with the positive result. Two value-scales are allowed, the percent (0 to 100) or point percent (0 to 1).
+
+*	Relevance
+The “Relevance” is an additional parameter, allowing the experts to provide additional estimates of the relevance of the particular evidence piece for the assessment question. Options include the four dictionary keys and their associated values: “certain”: 1, “plausible” : 0.9, “probable” : 0.75, and  “equivocal” : 0.5. This parameter is soft-coded using the “certain” value, therefore the reliability score will not be accounted for to scale the provided probabilities, unless changed accordingly. 
+
+*	Weight
+While the Relevance parameter facilitates scaling the provided probabilities, the weight parameter gives users the possibility to weight the evidence pieces, using integer numbers like 1,2,3 … etc. 
+
+After the information is provided and the cell is run, the underlying functions process the evidence accordingly, without the need of any user-interactions. Values like the bpa’s, the degrees of Belief and Plausibilty are automatically computed and stored in each instance of the class, separately. Additional functions like “return_results” and “visualise” allow for printing the results in an organised, tabular format and visualising the bonds of Belief and Plausibility, respectively. When relying one a single source of evidence, by running the function “decision-maker”, the code allows to make threshold-based decisions.
+Evidence combination can be started after all evidence pieces are processed and take on the form of the “Single_Evidence” class instance. Alternatively, evidence can also be added manually by running the function "add_evidence_manually()", thereby providing all required information. The “Evidece_Combinator” class is then initiated by providing a name, in a string format. All previously processed single evidence pieces are then added to the combinator class using the function “add_evidence(“Single_Evidence”-class instance)”. Next, the combination is performed by running the "combination()" function. As parameters of this function, can .... 
+
+TBC...
+
+
 
 
 ## Licensing
