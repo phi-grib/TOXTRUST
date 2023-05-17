@@ -20,3 +20,5 @@ dependencies:
     - sklearn
     - xlsxwriter
     - tqdm
+    - cirpy   ### for data curation
+    - bokeh   ### for data curation
