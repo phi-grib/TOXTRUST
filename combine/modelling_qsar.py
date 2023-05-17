@@ -158,7 +158,7 @@ class QSAR:
         self.test.dropna(subset=['molecule'], inplace=True)
         
         descriptors_test = self.compute_descriptors(self.selected_descriptors, 'test')
-        
+        tqdm().close()
         print("INFO - Predicting percent probability for the test series...")
         
         return self.model.predict_proba(descriptors_test)
@@ -171,8 +171,8 @@ class QSAR:
         self.test.dropna(subset=['molecule'], inplace=True)
         
         descriptors_test = self.compute_descriptors(self.selected_descriptors, 'test')       
-
+        tqdm().close()
         print("INFO - Predicting binary class labels for the test series...")
         
-        tqdm().close()
+        
         return self.model.predict(descriptors_test)
