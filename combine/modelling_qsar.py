@@ -48,7 +48,7 @@ class QSAR:
         calculator = MolecularDescriptorCalculator(simpleList=names)
 
         calculated_descriptors = [calculator.CalcDescriptors(mol) for mol in tqdm(df['molecule'])]
-        tqdm().close()
+
         try:
             scaled = pd.DataFrame(self.scaler.transform(calculated_descriptors), columns=names)
         except Exception:
@@ -68,7 +68,7 @@ class QSAR:
         properties_names = list(properties.GetPropertyNames())
 
         calculated_properties = [properties.ComputeProperties(mol) for mol in tqdm(df['molecule'])]
-        tqdm().close()
+
         try:
             scaled = pd.DataFrame(self.scaler.transform(calculated_properties), columns=properties_names)
         except Exception:
@@ -94,8 +94,7 @@ class QSAR:
             fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048, useFeatures=True)
 
             DataStructs.ConvertToNumpyArray(fp,xmatrix [index])
-        
-        tqdm().close()
+
         fp_data = pd.DataFrame(data=xmatrix, columns=[f'fp_{str(number)}' for number in range(2048)])
         
         nan_index = fp_data[fp_data.isnull().any(axis=1)].index.to_list()
@@ -159,9 +158,9 @@ class QSAR:
         self.test.dropna(subset=['molecule'], inplace=True)
         
         descriptors_test = self.compute_descriptors(self.selected_descriptors, 'test')
-        
+
         print("INFO - Predicting percent probability for the test series...")
-        
+
         return self.model.predict_proba(descriptors_test)
     
     def predict_class(self, path_test_series): #Predict class probabilities for X.
@@ -172,7 +171,7 @@ class QSAR:
         self.test.dropna(subset=['molecule'], inplace=True)
         
         descriptors_test = self.compute_descriptors(self.selected_descriptors, 'test')       
-        
+
         print("INFO - Predicting binary class labels for the test series...")
         
         

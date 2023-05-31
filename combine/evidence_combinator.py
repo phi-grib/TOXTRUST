@@ -295,41 +295,45 @@ class Evidence_Combinator:
     
     def automatised_rule_selector(self, data):
         
-        uncertainty, label = [],[]
+        label = []
 
         for index, row in data.iterrows():
 
             threshold_conflict = (row['Positive'] + row['Negative'])/2 
             
-            if row['Uncertain'] > 0.5:
-                uncertainty = True
-            
             if row['Positive'] > threshold_conflict:
                 label.append('p')
-            else:
+                
+            if row['Uncertain'] > self.auto_uncertainty_threshold:
+                label.append('u')
+                
+            if row['Negative'] > threshold_conflict:
                 label.append('n')
+                
 
         if len(set(label)) == 1:
-    
-            if not uncertainty:
-                rule = 'Dempster'
-                comment = 'INFO - Choosing Dempster\'s rule: Agreement between sources and none exceeding uncertainty threshold.'
-            else:
-                rule = 'Yager'
-                comment = 'INFO - Choosing Yager\'s rule: Agreement between sources, but uncertainty threshold exceeded.'
-        else: 
-            rule = 'Inagaki' ######'Inagaki' but the rule doesnt work yet because of the formula
-            comment = 'INFO - Choosing Inagaki\'s rule: No agreement between sources.'
+
+            rule = 'Dempster'
+            comment = 'INFO - Choosing Dempster\'s rule: Agreement between sources and none exceeding uncertainty threshold.'
+
+        elif 'u' in set(label):
             
+            rule = 'Yager'
+            comment = 'INFO - Choosing Yager\'s rule: Uncertainty threshold exceeded.'
+        else: 
+            
+            rule = 'Inagaki' 
+            comment = 'INFO - Choosing Inagaki\'s rule: No agreement between sources.'
+
         return rule, comment
     
     
-    def combination(self, rule_selection = None, scale_c_inagaki = 1, WoE = False):    # rule_selection from ['Dempster', 'Yager', 'Inagaki','auto'] or None
+    def combination(self, rule_selection = None, scale_c_inagaki = 1, auto_uncertainty_threshold = 0.3, WoE = False):    # rule_selection from ['Dempster', 'Yager', 'Inagaki','auto'] or None
 
         """ This function combines evidence using rules based on the Dempster-Shafer theory. The rule_selection options are: 'Dempster', 'Yager', 'Inagaki','auto', if None, all rules will be included in the output. """ 
         
         self.results = {}
-
+        self.auto_uncertainty_threshold = auto_uncertainty_threshold
         try:
             print(f"\nINFO - Evidence combination for: {self.id}")
         except Exception:
@@ -435,8 +439,8 @@ class Evidence_Combinator:
         else:
             return pd.concat([pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T , pd.DataFrame(self.results, index = ['Negative', 'Uncertain', 'Positive']).T])
 
-    def visualise(self, selection=None): # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
-        
+    def visualise(self, selection=None):    # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
+
         """ Visualisation of probability bars, selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None. """
         
         try:
@@ -448,6 +452,7 @@ class Evidence_Combinator:
 
         labels = chosen.index
         data = np.array(chosen)    
+
 
         data_cum = data.cumsum(axis=1)
         category_names = chosen.columns.to_list()
@@ -486,20 +491,15 @@ class Evidence_Combinator:
         ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
                   loc='lower left', fontsize=12)
 
+        if selection is None:
+            ax.axhline(len(self.return_results('bpa'))-0.5, color ='black', linewidth=0.8, linestyle='--') 
+
         plt.show()
         
-    def decision_maker(self, visualise = True, default = True):
+    def decision_maker(self, visualise = False, decision_threshold = 0.5, uncertainty_threshold = 0.3):
 
         """ Returns a decision based on combined evidence and the user-defined uncertainty and decision thresholds. """
         
-        if default:
-            decision_threshold = 0.5
-            uncertainty_threshold = 0.3
-        else:
-
-            decision_threshold = float(input('USER INPUT - Threshold for decision making (number between 0 and 1) --> '))
-            uncertainty_threshold = float(input('USER INPUT - Maximum allowed uncertainty level (number between 0 and 1) --> '))
-
         try:
             self.results
         except Exception:
@@ -526,14 +526,15 @@ class Evidence_Combinator:
         for k, val in decision_dict.items():
 
             if (uncertainty_col >= uncertainty_threshold or val <= decision_threshold):
-                self.decision = 'Uncertain'
+                decision = 'Uncertain'
 
             else:
 
-                self.decision = k
+                decision = k
                 break
-
-        print(f'INFO - The collected evidence suggests that that the result is {self.decision.lower()}','!')
+            
+        return decision
+        #print(f'INFO - The collected evidence suggests that that the result is {self.decision.lower()}','!')
         
         
 ### add belief and plausibility for combination... 
