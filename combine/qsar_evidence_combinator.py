@@ -590,7 +590,7 @@ class QSAR_Evidence_Combinator:
         ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
                   loc='lower left', fontsize=12)
 
-        plt.show()
+        return plt.show()
         
     def decision_maker(self, visualise = True, default = True, mol = None): 
         

@@ -139,16 +139,16 @@ class QSAR:
             
             print("INFO - Returning updated model performance considering prior probability...")
 
-            PPV = (sens *  prior)/ (sens *  prior + (1 - spec) * (1-prior))
-            NPV = (spec *  (1-prior))/ (spec *  (1-prior) + (1 - sens) * prior)  
+            PPV = round((sens *  prior)/ (sens *  prior + (1 - spec) * (1-prior)),2)
+            NPV = round((spec *  (1-prior))/ (spec *  (1-prior) + (1 - sens) * prior),2) 
 
-            return {'performance_pos':PPV,'performance_neg':NPV}
+            return {'reliability_negative':NPV,'reliability_positive':PPV}
 
         else:  
 
             print("INFO - Returning model evaluation metrics ...")
 
-            return {'performance_pos':sens,'performance_neg':spec}
+            return {'reliability_negative':spec,'reliability_positive':sens}
 
     def predict_proba(self, path_test_series): #Predict class probabilities for X.
         

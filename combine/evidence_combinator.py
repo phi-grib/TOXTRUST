@@ -21,7 +21,7 @@ class Single_Evidence:
         self.relevance = relevance # key from dict {'certain':1,'plausible':0.9,'probable':0.75,'equivocal':0.5}
         self.weight = weight # default 1, if other specify using integers
         self.reliability, self.bpa, self.belief_plausibility = self.evidence(source, result, reliability, relevance)
-        # reliability = dictionary or list of two values (starting with positive), percent (0 to 100) or point percent (0 to 1)
+        # reliability = dictionary or list of two values (starting with negative), percent (0 to 100) or point percent (0 to 1)
         
     def check_if_binary(self, r):
 
@@ -63,24 +63,24 @@ class Single_Evidence:
 
         if type(reliability) == dict:
 
-            rel = {'performance_pos': list(reliability.values())[0], 'performance_neg': list(reliability.values())[1]}
+            rel = {'reliability_negative': list(reliability.values())[0], 'reliability_positive': list(reliability.values())[1]}
 
         elif type(reliability) == list:
 
-            rel =  {'performance_pos':reliability[0],'performance_neg':reliability[1]}
+            rel =  {'reliability_negative':reliability[0],'reliability_positive':reliability[1]}
 
         else:
 
             reliability = reliability / 100 if reliability > 1 else reliability
 
-            rel = {'performance_pos':reliability, 'performance_neg':reliability}
+            rel = {'reliability_negative':reliability, 'reliability_positive':reliability}
 
         ############## compute bpa's ############## 
 
         relevance_dict = {'certain':1,'plausible':0.9,'probable':0.75,'equivocal':0.5}
 
-        bpa_pos = data[1] * rel['performance_pos'] * relevance_dict[relevance]
-        bpa_neg = data[0] * rel['performance_neg'] * relevance_dict[relevance]
+        bpa_pos = data[1] * rel['reliability_positive'] * relevance_dict[relevance]
+        bpa_neg = data[0] * rel['reliability_negative'] * relevance_dict[relevance]
         ignorance = 1 - (bpa_pos + bpa_neg)
 
         bpa = np.array([bpa_neg, ignorance, bpa_pos])
@@ -125,7 +125,7 @@ class Single_Evidence:
         v = {'Negative': self.belief_plausibility[0] + (self.belief_plausibility[1] - self.belief_plausibility[0])/2 ,'Positive': self.belief_plausibility[2] + (self.belief_plausibility[3] - self.belief_plausibility[2])/2}
 
         y_error = self.bpa[1] /2 # assuming equal level of ignorance for each prediction from a constant source
-        plt.figure(figsize=(6,4))
+        plt.figure(figsize=(4.5,3.25))
 
         x, y = [], []
 
@@ -136,19 +136,19 @@ class Single_Evidence:
                 x.append(key)
                 y.append(value)
 
-        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=10,elinewidth=3,markeredgewidth=4, color='#165379')
+        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=10,elinewidth=3,markeredgewidth=4, color='black')#165379
 
 
         #plt.xlabel('Outcome', fontsize=15, labelpad=17)
-        plt.ylabel('Probability', fontsize=16, labelpad=15)
+        plt.ylabel('Probability', fontsize=15, labelpad=12)
 
-        plt.xticks(fontsize=16)
-        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=13)
-        plt.ylim(bottom = -0.15,top=1.15)
+        plt.xticks(fontsize=15)
+        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=11)
+        plt.ylim(bottom = -0.12,top=1.12)
 
 
         plt.margins(0.45)
-        plt.title(f'Evidence probability bounds ({self.identifier})', fontsize=18, pad=12)
+        plt.title(f'Probability bounds ({self.identifier})', fontsize=15, pad=10)
 
         font = {'family': 'Calibri',
                 'color':  'black',
@@ -159,16 +159,16 @@ class Single_Evidence:
 
         if len(x) == 2:
 
-            plt.text(x=-0.10,y= (v['Negative'] - y_error - 0.10), s='Belief', fontdict=font, size=16)
-            plt.text(x=-0.15,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=16)
+            plt.text(x=-0.13,y= (v['Negative'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
+            plt.text(x=-0.2,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
 
-            plt.text(x=0.91,y= (v['Positive'] - y_error - 0.10), s='Belief', fontdict=font, size=16)
-            plt.text(x=0.84,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=16)
+            plt.text(x=0.88,y= (v['Positive'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
+            plt.text(x=0.79,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
 
         else:
 
-            plt.text(x = -0.011,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=16)
-            plt.text(x = -0.019,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=16)
+            plt.text(x = -0.011,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=15)
+            plt.text(x = -0.019,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=15)
 
         plt.axhline(y = visualise_threshold, color = 'r', linestyle = 'dashed') 
 
@@ -439,14 +439,12 @@ class Evidence_Combinator:
         else:
             return pd.concat([pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T , pd.DataFrame(self.results, index = ['Negative', 'Uncertain', 'Positive']).T])
 
-    def visualise(self, selection=None):    # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
+    def visualise(self, selection=None, compound_name=None, save_path=None):    # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
 
         """ Visualisation of probability bars, selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None. """
         
-        try:
-            print(f'INFO - Showing results for: {self.id}')
-        except Exception:
-            print('INFO - Showing results for added evidence...')
+
+        print('INFO - Showing results for added evidence...')
 
         chosen = self.return_results(selection)
 
@@ -457,7 +455,7 @@ class Evidence_Combinator:
         data_cum = data.cumsum(axis=1)
         category_names = chosen.columns.to_list()
 
-        category_colors = matplotlib.cm.get_cmap('RdYlGn')(np.linspace(0.8,0.20, data.shape[1]))
+        category_colors = matplotlib.cm.get_cmap('RdYlGn')(np.linspace(0.85,0.16, data.shape[1]))
 
         if len (chosen.index) == 1:
             fig, ax = plt.subplots(figsize=(8.5, 1.1))
@@ -488,13 +486,21 @@ class Evidence_Combinator:
                     ax.text(x, y, str(round(c,2)), ha='center', va='center',
                         color=text_color, fontsize=12,fontname= "Arial") #fontweight="bold"
 
-        ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
+        ax.legend(ncol=len(category_names), bbox_to_anchor=(-0.015, -0.12),
                   loc='lower left', fontsize=12)
 
         if selection is None:
             ax.axhline(len(self.return_results('bpa'))-0.5, color ='black', linewidth=0.8, linestyle='--') 
-
+        
+        if compound_name is None:
+            plt.title('Probabilistic DST combination)', fontsize=15, pad=10)
+        else:
+            plt.title(f'Probabilistic DST combination for ({compound_name})', fontsize=15, pad=15)
+            
         plt.show()
+        
+        if save_path is not None:
+            fig.savefig(f'{save_path}.tiff',facecolor='white', bbox_inches = 'tight')
         
     def decision_maker(self, visualise = False, decision_threshold = 0.5, uncertainty_threshold = 0.3):
 
@@ -534,7 +540,90 @@ class Evidence_Combinator:
                 break
             
         return decision
-        #print(f'INFO - The collected evidence suggests that that the result is {self.decision.lower()}','!')
+
+    def BeliefPlausibilityCombined(self):
+        
+        try:
+            self.results
+        except Exception:
+            self.combination('auto')
+
+        if self.rule is not None:
+
+            rule_decision = self.rule
+
+        else:
+
+            df = self.return_results('bpa').copy()
+            rule_decision = self.automatised_rule_selector(df)[0]
+        
+        decision_dict = {'Negative': self.results[rule_decision][0],'Positive':self.results[rule_decision][2]}
+        uncertainty_col = self.results[rule_decision][1]
         
         
-### add belief and plausibility for combination... 
+        bel_pos = self.results[rule_decision][2]
+        bel_neg = self.results[rule_decision][0]
+
+        pl_pos = 0 if bel_pos == 0 else bel_pos + self.results[rule_decision][1]
+        pl_neg = 0 if bel_neg == 0 else bel_neg + self.results[rule_decision][1]
+       
+        self.belief_plausibility = np.array([bel_neg, pl_neg, bel_pos, pl_pos])
+       
+        return self.belief_plausibility 
+        
+    def VisualiseBeliefPlausibilityCombination(self, compound_name=None, visualise_threshold = 0.5):
+    
+        v = {'Negative': self.belief_plausibility[0] + (self.belief_plausibility[1] - self.belief_plausibility[0])/2 ,'Positive': self.belief_plausibility[2] + (self.belief_plausibility[3] - self.belief_plausibility[2])/2}
+
+
+        y_error = (self.belief_plausibility[1] - self.belief_plausibility[0])/2
+        plt.figure(figsize=(4.5,3.25))
+
+        x, y = [], []
+
+        for key, value in v.items():
+
+            if value != 0:
+
+                x.append(key)
+                y.append(value)
+
+        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=10,elinewidth=3,markeredgewidth=4, color='black')#165379
+
+        #plt.xlabel('Outcome', fontsize=15, labelpad=17)
+        plt.ylabel('Probability', fontsize=15, labelpad=12)
+
+        plt.xticks(fontsize=15)
+        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=11)
+        plt.ylim(bottom = -0.12,top=1.12)
+
+        plt.margins(0.45)
+        
+        if compound_name is None:
+            plt.title('Evidence probability bounds', fontsize=15, pad=10)
+        else:
+            plt.title(f'Evidence probability bounds for {compound_name}', fontsize=15, pad=15)
+
+        font = {'family': 'Calibri',
+                'color':  'black',
+                'weight': 'normal',
+                'size': 16,
+                'style':'italic'
+                }
+
+        if len(x) == 2:
+
+            plt.text(x=-0.13,y= (v['Negative'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
+            plt.text(x=-0.2,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
+
+            plt.text(x=0.88,y= (v['Positive'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
+            plt.text(x=0.79,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
+
+        else:
+
+            plt.text(x = -0.011,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=15)
+            plt.text(x = -0.019,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=15)
+
+        plt.axhline(y = visualise_threshold, color = 'r', linestyle = 'dashed') 
+
+        plt.show()
