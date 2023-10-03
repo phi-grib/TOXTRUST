@@ -10,7 +10,7 @@ from IPython.display import display
 import matplotlib.pyplot as plt
 import os
 
-class Single_Evidence:
+class SingleEvidence:
     
     def __init__(self, identifier, source, result, reliability, relevance='certain', weight=1):
         
@@ -18,7 +18,7 @@ class Single_Evidence:
         
         self.identifier = identifier # unique model id
         self.source = source # 'expert','qsar','in vitro', 'positive alert', 'negative alert' for alerts, we need to distinct pos y neg
-        self.relevance = relevance # key from dict {'certain':1,'plausible':0.9,'probable':0.75,'equivocal':0.5}
+        self.relevance = relevance.lower() # key from dict {'certain':1,'plausible':0.9,'probable':0.75,'equivocal':0.5}
         self.weight = weight # default 1, if other specify using integers
         self.reliability, self.bpa, self.belief_plausibility = self.evidence(source, result, reliability, relevance)
         # reliability = dictionary or list of two values (starting with negative), percent (0 to 100) or point percent (0 to 1)
@@ -29,7 +29,7 @@ class Single_Evidence:
     
     def evidence(self, source, result, reliability, relevance): 
 
-        print(f'INFO - Processing evidence identified as {self.identifier} of type {source.lower()}.')
+        print(f'INFO - Processed evidence identified as {self.identifier} of type {source.lower()}.')
 
         methods = pd.DataFrame({'True_Binary':['qualitative_one_class_p','qualitative_one_class_p','qualitative_one_class_p','qualitative_one_class_p','qualitative_one_class_n'], 'False_Binary':['quantitative_two_class','quantitative_one_class',None,None,None]}, index=['qsar','expert','in vitro', 'positive alert', 'negative alert'])
         # each source has a typical associated method  
@@ -52,7 +52,7 @@ class Single_Evidence:
             pos = result
             neg = 1 - pos
 
-            data = np.array([neg,pos]).T
+            data = np.array([neg,pos]).T   ### check how to include the change for the expert, binary one number and level of ignorance
 
         elif evidence_type == 'qualitative_one_class_n': #alert or prediction - predict normal 
 
@@ -77,11 +77,11 @@ class Single_Evidence:
 
         ############## compute bpa's ############## 
 
-        relevance_dict = {'certain':1,'plausible':0.9,'probable':0.75,'equivocal':0.5}
+        relevance_dict = {'certain':1,'probable':0.9,'plausible':0.75,'equivocal':0.5, 'doubted':0.25,'improbable':0.1,'impossible':0}
 
-        bpa_pos = data[1] * rel['reliability_positive'] * relevance_dict[relevance]
-        bpa_neg = data[0] * rel['reliability_negative'] * relevance_dict[relevance]
-        ignorance = 1 - (bpa_pos + bpa_neg)
+        bpa_pos = round(data[1] * rel['reliability_positive'] * relevance_dict[relevance],2)
+        bpa_neg = round(data[0] * rel['reliability_negative'] * relevance_dict[relevance],2)
+        ignorance = round(1 - (bpa_pos + bpa_neg),2)
 
         bpa = np.array([bpa_neg, ignorance, bpa_pos])
 
@@ -97,35 +97,35 @@ class Single_Evidence:
 
         return rel, bpa,  belief_plausibility
     
-    def show_components(self, selection=None): # selection includes either of ['bpa', 'bp'], can be left empty  
+    def ShowComponents(self, selection=None): # selection includes either of ['bpa', 'bp'], can be left empty  
         
         """" By selecting 'bpa', you will be able to display the basic probabilty assigment for the toxicological evidence piece. By selecting 'bp', you will view belief and probability. By just calling the function, you will see both."""
         
         
         if selection == 'bpa':
             
-            print('Showing the basic probability assignments of provided evidence ...')
-            display(pd.DataFrame({self.identifier:self.bpa}, index=['Negative','Uncertain','Positive']).T)
+            print('INFO - Showing  basic probability masses computed for provided evidence ...')
+            display(pd.DataFrame({self.identifier:self.bpa}, index=['Negative','Uncertain','Positive']).T.round(2))
             
         elif selection == 'bp':
             
-            print('Showing the belief and plausibility for outcomes associated with provided evidence...')
-            display(pd.DataFrame({self.identifier:self.belief_plausibility}, index = ['Belief (Negative)','Plausibility (Negative)','Belief (Positive)','Plausibility (Positive)']).T)
+            print('INFO - Showing the Belief and Plausibility for outcomes associated with provided evidence...')
+            display(pd.DataFrame({self.identifier:self.belief_plausibility}, index = ['Belief (Negative)','Plausibility (Negative)','Belief (Positive)','Plausibility (Positive)']).T.round(2))
 
         else:
-            print('Showing the basic probability assignments of provided evidence...')
-            display(pd.DataFrame({self.identifier:self.bpa}, index=['Negative','Uncertain','Positive']).T)
+            print('INFO - Showing  basic probability masses computed for provided evidence ...')
+            display(pd.DataFrame({self.identifier:self.bpa}, index=['Negative','Uncertain','Positive']).T.round(2))
             
-            print('Showing the belief and plausibility for outcomes associated with provided evidence...')
-            display(pd.DataFrame({self.identifier:self.belief_plausibility}, index = ['Belief (Negative)','Plausibility (Negative)','Belief (Positive)','Plausibility (Positive)']).T)
+            print('INFO - Showing the Belief and Plausibility for outcomes associated with provided evidence...')
+            display(pd.DataFrame({self.identifier:self.belief_plausibility}, index = ['Belief (Negative)','Plausibility (Negative)','Belief (Positive)','Plausibility (Positive)']).T.round(2))
 
     
-    def visualise_single_evidence(self, visualise_threshold = 0.5):
+    def VisualiseSingleEvidence(self, visualise_threshold = 0.5, export_path=None):
 
         v = {'Negative': self.belief_plausibility[0] + (self.belief_plausibility[1] - self.belief_plausibility[0])/2 ,'Positive': self.belief_plausibility[2] + (self.belief_plausibility[3] - self.belief_plausibility[2])/2}
 
         y_error = self.bpa[1] /2 # assuming equal level of ignorance for each prediction from a constant source
-        plt.figure(figsize=(4.5,3.25))
+        plt.figure(figsize=(3.5,2.75))
 
         x, y = [], []
 
@@ -136,58 +136,54 @@ class Single_Evidence:
                 x.append(key)
                 y.append(value)
 
-        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=10,elinewidth=3,markeredgewidth=4, color='black')#165379
+        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=6,elinewidth=2,markeredgewidth=2, color='black')#165379
 
 
         #plt.xlabel('Outcome', fontsize=15, labelpad=17)
-        plt.ylabel('Probability', fontsize=15, labelpad=12)
+        plt.ylabel('Probability', fontsize=13, labelpad=10)
 
-        plt.xticks(fontsize=15)
-        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=11)
-        plt.ylim(bottom = -0.12,top=1.12)
+        plt.xticks(fontsize=13)
+        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=9)
+        plt.ylim(bottom = -0.15,top=1.15)
 
 
         plt.margins(0.45)
-        plt.title(f'Probability bounds ({self.identifier})', fontsize=15, pad=10)
-
-        font = {'family': 'Calibri',
+        #plt.title(f'Probability bounds ({self.identifier})', fontsize=13, pad=8)
+        plt.title(f'{self.identifier}', fontsize=13, pad=8)
+        
+        
+        font = {#'family': 'Calibri',
                 'color':  'black',
                 'weight': 'normal',
-                'size': 16,
+                'size': 14,
                 'style':'italic'
                 }
 
         if len(x) == 2:
 
-            plt.text(x=-0.13,y= (v['Negative'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
-            plt.text(x=-0.2,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
+            plt.text(x=-0.13,y= (v['Negative'] - y_error - 0.09), s='Belief', fontdict=font, size=10)
+            plt.text(x=-0.2,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=10)
 
-            plt.text(x=0.88,y= (v['Positive'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
-            plt.text(x=0.79,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
+            plt.text(x=0.88,y= (v['Positive'] - y_error - 0.09), s='Belief', fontdict=font, size=10)
+            plt.text(x=0.79,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=10)
 
         else:
 
-            plt.text(x = -0.011,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=15)
-            plt.text(x = -0.019,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=15)
+            plt.text(x = -0.014,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=10)
+            plt.text(x = -0.023,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=10)
 
         plt.axhline(y = visualise_threshold, color = 'r', linestyle = 'dashed') 
 
+        if export_path is not None:
+            plt.savefig(f'{export_path}',facecolor='white', bbox_inches = 'tight')
+            
         plt.show()
+        
                 
-    
-    def decision_maker(self, visualise = True, default=True):
+    def DecisionMaker(self, visualise = False, return_decision=True, decision_threshold = 0.5, uncertainty_threshold = 0.3):
 
         """  The decision maker evaluates both, the belief and the uncertainty associated with a single piece of toxicological evidence """
         
-        if default == True:
-            decision_threshold = 0.5
-            uncertainty_threshold = 0.3
-            print('INFO - Default settings kept for decision and uncertainty thresholds!')
-        else:
-
-            decision_threshold = float(input('USER INPUT - Threshold for decision (number between 0 and 1) --> '))
-            uncertainty_threshold = float(input('USER INPUT - Maximum allowed uncertainty level (number between 0 and 1) --> '))
-
         if visualise == True:
 
             self.visualise_single_evidence(decision_threshold)
@@ -206,33 +202,37 @@ class Single_Evidence:
                 self.decision = k
                 break
             
-        print(f'Evidence identified as {self.identifier} of type {self.source.lower()} suggests that that the result is', self.decision.lower(),'!')
+        #print(f'Evidence identified as {self.identifier} of type {self.source.lower()} suggests that that the result is', self.decision.lower(),'!')
+        
+        if return_decision == True:
+            return self.decision 
 
-class Evidence_Combinator:
+            ### TO DO:make decisions nummeric
+
+class EvidenceCombinator:
     
-    def __init__(self, endpoint): 
+    def __init__(self, endpoint, compound=None): 
 
         self.endpoint = endpoint
         self.bpa = {}
         self.results = {}
         self.weights_dict = {}
-
-        print(f'INFO - Evidence Combinator initiated for the endpoint "{endpoint}"...')
         
-    def compound(self, compound_name):
-        
-        self.id = compound_name
+        if compound is not None:
+            self.id = compound
 
-        print(f'INFO - Evidence will be collected and combined for "{compound_name}"...')
+            print(f'INFO - Evidence will be collected for {compound}, focussing on the endpoint "{endpoint}"...')
+        else:
+            print(f'INFO - Evidence Combinator initiated for the endpoint "{endpoint}"...')
     
-    def add_evidence(self, single_evidence): # from Single_Evidence class
+    def AddEvidence(self, single_evidence): # from Single_Evidence class
         
         print(f'INFO - Adding evidence with identifier "{single_evidence.identifier}" of type "{single_evidence.source}"...')
 
         self.bpa[single_evidence.identifier] = single_evidence.bpa
         self.weights_dict[single_evidence.identifier] = single_evidence.weight
         
-    def add_evidence_manually(self, identifier, bpa, weight):
+    def AddEvidenceManually(self, identifier, bpa, weight):
         
         """ This function allows to add evidence without previously applying the QSAR_Single_Evidence class. 
         The following must be defined as identifier: str, bpa: three element numpy array (negative, uncertain, positive), weight: int. """
@@ -240,7 +240,7 @@ class Evidence_Combinator:
         self.bpa[identifier] = bpa
         self.weights_dict[identifier] = weight
     
-    def update_weights(self, new_weights):  
+    def UpdateWeights(self, new_weights):  
         
         """ This function allows to update weights stored in the evidence combinator, use a dictonary with evidence identifiers as keys and new weights as values. """
 
@@ -328,18 +328,14 @@ class Evidence_Combinator:
         return rule, comment
     
     
-    def combination(self, rule_selection = None, scale_c_inagaki = 1, auto_uncertainty_threshold = 0.3, WoE = False):    # rule_selection from ['Dempster', 'Yager', 'Inagaki','auto'] or None
+    def Combination(self, rule_selection = None, scale_c_inagaki = 1, auto_uncertainty_threshold = 0.3, WoE = False):    # rule_selection from ['Dempster', 'Yager', 'Inagaki','auto'] or None
 
         """ This function combines evidence using rules based on the Dempster-Shafer theory. The rule_selection options are: 'Dempster', 'Yager', 'Inagaki','auto', if None, all rules will be included in the output. """ 
         
         self.results = {}
         self.auto_uncertainty_threshold = auto_uncertainty_threshold
-        try:
-            print(f"\nINFO - Evidence combination for: {self.id}")
-        except Exception:
-            print("\nINFO - Running evidence combination...")
 
-        df = self.return_results('bpa').copy()
+        df = self.ReturnResults('bpa').copy()
 
         if WoE:
 
@@ -365,8 +361,7 @@ class Evidence_Combinator:
         gpm_neg = self.collect(df_gpm, iterations_n)
         gpm_unc = df_gpm['U'].prod()
         gpm_con = 1 - (gpm_pos + gpm_neg + gpm_unc)
-
-
+        
         print("INFO - Combining evidence...")
 
         k_dempster = 1 - gpm_con
@@ -423,39 +418,40 @@ class Evidence_Combinator:
                 print(rule_selection_info)
     
     
-    def return_results(self, selection=None): # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
+    def ReturnResults(self, selection=None): # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
         
         """" Selecting 'bpa', or 'result' returns the basic probabilty masses or all combination scores, respectively. By selecting a rule name, all the basic probabilty masses together with the specific combination score will be returned."""
         
         if selection == 'bpa':
-            return pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T
+            return pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T.round(2)
         
         elif selection == 'result':
-            return pd.DataFrame(self.results, index = ['Negative', 'Uncertain', 'Positive']).T
+            return pd.DataFrame(self.results, index = ['Negative', 'Uncertain', 'Positive']).T.round(2)
         
         elif selection in ['Dempster','Yager','Inagaki']:
-            return pd.concat([pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T , pd.DataFrame({selection:self.results[selection]},index = ['Negative', 'Uncertain', 'Positive']).T])
+            return pd.concat([pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T , pd.DataFrame({selection:self.results[selection]},index = ['Negative', 'Uncertain', 'Positive']).T]).round(2)
             
         else:
-            return pd.concat([pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T , pd.DataFrame(self.results, index = ['Negative', 'Uncertain', 'Positive']).T])
+            return pd.concat([pd.DataFrame(self.bpa, index = ['Negative', 'Uncertain', 'Positive']).T , pd.DataFrame(self.results, index = ['Negative', 'Uncertain', 'Positive']).T]).round(2)
 
-    def visualise(self, selection=None, compound_name=None, save_path=None):    # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
+    def Visualise(self, selection=None, export_path=None):    # selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None
 
         """ Visualisation of probability bars, selection from ['bpa', 'result', 'Dempster', 'Yager', 'Inagaki'] or None. """
         
 
-        print('INFO - Showing results for added evidence...')
+        #print(f'INFO - Showing combination results for {self.id}, generated for endpoint "{self.endpoint}"...')
 
-        chosen = self.return_results(selection)
-
-        labels = chosen.index
+        chosen = self.ReturnResults(selection)
+        
+        labels = [item + str("'s rule") if item in ['Dempster','Yager','Inagaki'] else item for item in chosen.index ]
+        
         data = np.array(chosen)    
 
 
         data_cum = data.cumsum(axis=1)
         category_names = chosen.columns.to_list()
 
-        category_colors = matplotlib.cm.get_cmap('RdYlGn')(np.linspace(0.85,0.16, data.shape[1]))
+        category_colors = matplotlib.cm.get_cmap('Blues')(np.linspace(0.15,0.75, data.shape[1]))
 
         if len (chosen.index) == 1:
             fig, ax = plt.subplots(figsize=(8.5, 1.1))
@@ -486,23 +482,23 @@ class Evidence_Combinator:
                     ax.text(x, y, str(round(c,2)), ha='center', va='center',
                         color=text_color, fontsize=12,fontname= "Arial") #fontweight="bold"
 
-        ax.legend(ncol=len(category_names), bbox_to_anchor=(-0.015, -0.12),
+        ax.legend(ncol=len(category_names), bbox_to_anchor=(-0.015, -0.08),
                   loc='lower left', fontsize=12)
 
         if selection is None:
-            ax.axhline(len(self.return_results('bpa'))-0.5, color ='black', linewidth=0.8, linestyle='--') 
+            ax.axhline(len(self.ReturnResults('bpa'))-0.5, color ='black', linewidth=0.8, linestyle='--') 
         
-        if compound_name is None:
-            plt.title('Probabilistic DST combination)', fontsize=15, pad=10)
+        if self.id is not None:
+            plt.title(f'Evidence combination ({self.id})', fontsize=15, pad=13)
         else:
-            plt.title(f'Probabilistic DST combination for ({compound_name})', fontsize=15, pad=15)
+            plt.title('Evidence combination', fontsize=15, pad=13)
             
         plt.show()
         
-        if save_path is not None:
-            fig.savefig(f'{save_path}.tiff',facecolor='white', bbox_inches = 'tight')
+        if export_path is not None:
+            fig.savefig(f'{export_path}',facecolor='white', bbox_inches = 'tight')
         
-    def decision_maker(self, visualise = False, decision_threshold = 0.5, uncertainty_threshold = 0.3):
+    def DecisionMaker(self, visualise = False, return_decision=True, decision_threshold = 0.5, uncertainty_threshold = 0.3):
 
         """ Returns a decision based on combined evidence and the user-defined uncertainty and decision thresholds. """
         
@@ -519,7 +515,7 @@ class Evidence_Combinator:
 
             print('INFO - No rule selected for combination, running the automatized rule selector.')
 
-            df = self.return_results('bpa').copy()
+            df = self.ReturnResults('bpa').copy()
             rule_decision = self.automatised_rule_selector(df)[0]
 
         if visualise == True:
@@ -538,8 +534,12 @@ class Evidence_Combinator:
 
                 decision = k
                 break
-            
-        return decision
+        
+        print(f'INFO - Combining the provided evidence suggests that the result is {decision}!')
+
+        if return_decision == True:
+            return decision
+            ### TO DO: make decisions nummeric
 
     def BeliefPlausibilityCombined(self):
         
@@ -554,7 +554,7 @@ class Evidence_Combinator:
 
         else:
 
-            df = self.return_results('bpa').copy()
+            df = self.ReturnResults('bpa').copy()
             rule_decision = self.automatised_rule_selector(df)[0]
         
         decision_dict = {'Negative': self.results[rule_decision][0],'Positive':self.results[rule_decision][2]}
@@ -570,6 +570,12 @@ class Evidence_Combinator:
         self.belief_plausibility = np.array([bel_neg, pl_neg, bel_pos, pl_pos])
        
         return self.belief_plausibility 
+    
+    def ShowBeliefPlausibilityCombined(self): # selection includes either of ['bpa', 'bp'], can be left empty  
+          
+        print('Showing the belief and plausibility for outcomes associated with provided evidence...')
+        display(pd.DataFrame({self.endpoint:self.BeliefPlausibilityCombined()}, index = ['Belief (Negative)','Plausibility (Negative)','Belief (Positive)','Plausibility (Positive)']).T.round(2))
+
         
     def VisualiseBeliefPlausibilityCombination(self, compound_name=None, visualise_threshold = 0.5):
     
@@ -577,7 +583,7 @@ class Evidence_Combinator:
 
 
         y_error = (self.belief_plausibility[1] - self.belief_plausibility[0])/2
-        plt.figure(figsize=(4.5,3.25))
+        plt.figure(figsize=(3.5,2.75))
 
         x, y = [], []
 
@@ -588,42 +594,44 @@ class Evidence_Combinator:
                 x.append(key)
                 y.append(value)
 
-        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=10,elinewidth=3,markeredgewidth=4, color='black')#165379
+        plt.errorbar(x, y, yerr = y_error,linestyle="", capsize=6,elinewidth=2,markeredgewidth=2, color='black')#165379
 
         #plt.xlabel('Outcome', fontsize=15, labelpad=17)
-        plt.ylabel('Probability', fontsize=15, labelpad=12)
+        plt.ylabel('Probability', fontsize=13, labelpad=11)
 
-        plt.xticks(fontsize=15)
-        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=11)
-        plt.ylim(bottom = -0.12,top=1.12)
+        plt.xticks(fontsize=13)
+        plt.yticks(np.arange(0, 1.05, step=0.1), fontsize=9)
+        plt.ylim(bottom = -0.15,top=1.15)
+
 
         plt.margins(0.45)
         
         if compound_name is None:
-            plt.title('Evidence probability bounds', fontsize=15, pad=10)
+            plt.title('Evidence probability bounds', fontsize=13, pad=8)
         else:
-            plt.title(f'Evidence probability bounds for {compound_name}', fontsize=15, pad=15)
+            plt.title(f'Evidence probability bounds ({compound_name})', fontsize=13, pad=8)
 
-        font = {'family': 'Calibri',
+        font = {#'family': 'Calibri',
                 'color':  'black',
                 'weight': 'normal',
-                'size': 16,
+                'size': 14,
                 'style':'italic'
                 }
 
         if len(x) == 2:
+    
+            plt.text(x=-0.13,y= (v['Negative'] - y_error - 0.09), s='Belief', fontdict=font, size=10)
+            plt.text(x=-0.2,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=10)
 
-            plt.text(x=-0.13,y= (v['Negative'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
-            plt.text(x=-0.2,y= (v['Negative'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
-
-            plt.text(x=0.88,y= (v['Positive'] - y_error - 0.09), s='Belief', fontdict=font, size=14)
-            plt.text(x=0.79,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=14)
+            plt.text(x=0.88,y= (v['Positive'] - y_error - 0.09), s='Belief', fontdict=font, size=10)
+            plt.text(x=0.79,y= (v['Positive'] + y_error + 0.04), s='Plausibility', fontdict=font, size=10)
 
         else:
 
-            plt.text(x = -0.011,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=15)
-            plt.text(x = -0.019,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=15)
+            plt.text(x = -0.014,y= (v[x[0]] - y_error - 0.10), s='Belief', fontdict=font, size=10)
+            plt.text(x = -0.023,y= (v[x[0]] + y_error + 0.04), s='Plausibility', fontdict=font, size=10)
 
         plt.axhline(y = visualise_threshold, color = 'r', linestyle = 'dashed') 
 
         plt.show()
+        
