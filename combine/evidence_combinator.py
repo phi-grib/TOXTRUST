@@ -443,7 +443,7 @@ class EvidenceCombinator:
 
         chosen = self.ReturnResults(selection)
         
-        labels = [item + str("'s rule") if item in ['Dempster','Yager','Inagaki'] else item for item in chosen.index ]
+        labels = ["Combination result" if item in ['Dempster','Yager','Inagaki'] else item for item in chosen.index ] #[item + str("'s rule") if item in ['Dempster','Yager','Inagaki'] else item for item in chosen.index ]
         
         data = np.array(chosen)    
 
@@ -482,7 +482,7 @@ class EvidenceCombinator:
                     ax.text(x, y, str(round(c,2)), ha='center', va='center',
                         color=text_color, fontsize=12,fontname= "Arial") #fontweight="bold"
 
-        ax.legend(ncol=len(category_names), bbox_to_anchor=(-0.015, -0.08),
+        ax.legend(ncol=len(category_names), bbox_to_anchor=(-0.015, -0.14),
                   loc='lower left', fontsize=12)
 
         if selection is None:
