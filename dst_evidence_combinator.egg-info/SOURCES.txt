@@ -4,11 +4,10 @@ setup.py
 combine/__init__.py
 combine/config.yaml
 combine/evidence_combinator.py
-combine/evidence_combinator_noprint.py
 combine/libraries.py
 combine/modelling_qsar.py
 combine/qsar_evidence_combinator.py
-dst_evidence_combinator.egg-info/PKG-INFO
-dst_evidence_combinator.egg-info/SOURCES.txt
-dst_evidence_combinator.egg-info/dependency_links.txt
-dst_evidence_combinator.egg-info/top_level.txt
+TOXTRUST.egg-info/PKG-INFO
+TOXTRUST.egg-info/SOURCES.txt
+TOXTRUST.egg-info/dependency_links.txt
+TOXTRUST.egg-info/top_level.txt

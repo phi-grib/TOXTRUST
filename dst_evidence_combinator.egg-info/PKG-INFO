@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
-Name: dst-evidence-combinator
+Name: TOXTRUST
 Version: 0.1
 Summary: DST-based toxicological evidence combinator
-Home-page: https://github.com/phi-grib/dst_evidence_combinator
-Download-URL: https://github.com/phi-grib/dst_evidence_combinator.git
+Home-page: https://github.com/phi-grib/TOXTRUST
+Download-URL: https://github.com/phi-grib/TOXTRUST.git
 Author: Karolina Kopanska
 Author-email: karolinaweronika.kopanska@upf.edu
 License: GNU

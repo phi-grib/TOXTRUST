@@ -1,9 +1,0 @@
-- document the code     https://github.com/scikit-learn/scikit-learn/blob/364c77e04/sklearn/model_selection/_split.py#L2463
-
-- edit readme   https://www.markdownguide.org/basic-syntax/
-
-- add example flexible
-
-- describe the case studies
-
-
