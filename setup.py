@@ -6,15 +6,15 @@ from setuptools.command.develop import develop
 #    long_description = f.read()
 
 setup(
-    name='dst_evidence_combinator',
+    name='TOXTRUST',
     version='0.1',
     description='DST-based toxicological evidence combinator',
     license='GNU',
 #    long_description=long_description,
     author='Karolina Kopanska',
     author_email='karolinaweronika.kopanska@upf.edu',
-    url='https://github.com/phi-grib/dst_evidence_combinator',
-    download_url='https://github.com/phi-grib/dst_evidence_combinator.git',
+    url='https://github.com/phi-grib/TOXTRUST',
+    download_url='https://github.com/phi-grib/TOXTRUST.git',
     packages=find_packages(),
     # If any package contains *.txt or *.rst files, include them:
     # package_data={'': ['*.yaml', '*.yml']},
