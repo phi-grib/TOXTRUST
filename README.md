@@ -97,8 +97,6 @@ The *SingleEvidence* class collects and processes information associated with si
 | weight        | optional | expert-defined weight of the evidence body, as compared to other evidence bodies considered for combination; the default setting is 1                                                                                  | integer number | arbitrary integer number (e.g.: 1, 2, 3, …)                                                                                                        |
 
 
-%%%%%%%
-
 
 The code for evidence processing and combination as well as the list of required libraries are stored in the combine-subpackage, which must be loaded first. Then, each piece of information derived from an independent body of evidence is handled separately by the “Single_Evidence” class. The initiation of this class required providing the following information:
 
@@ -121,19 +119,8 @@ The “Relevance” is an additional parameter, allowing the experts to provide 
 While the Relevance parameter facilitates scaling the provided probabilities, the weight parameter gives users the possibility to weight the evidence pieces, using integer numbers like 1,2,3 … etc. 
 
 After the information is provided and the cell is run, the underlying functions process the evidence accordingly, without the need of any user-interactions. Values like the bpa’s, the degrees of Belief and Plausibilty are automatically computed and stored in each instance of the class, separately. Additional functions like “return_results” and “visualise” allow for printing the results in an organised, tabular format and visualising the bonds of Belief and Plausibility, respectively. When relying one a single source of evidence, by running the function “decision-maker”, the code allows to make threshold-based decisions.
-Evidence combination can be started after all evidence pieces are processed and take on the form of the “Single_Evidence” class instance. Alternatively, evidence can also be added manually by running the function "add_evidence_manually()", thereby providing all required information. The “Evidece_Combinator” class is then initiated by providing a name, in a string format. All previously processed single evidence pieces are then added to the combinator class using the function “add_evidence(“Single_Evidence”-class instance)”. Next, the combination is performed by running the "combination()" function. As parameters of this function, can .... 
 
-TBC...
-
-
-
-
-
-
-
-
-
-
+Evidence combination can be started after all evidence pieces are processed and take on the form of the “Single_Evidence” class instance. Alternatively, evidence can also be added manually by running the function "add_evidence_manually()", thereby providing all required information. The “Evidece_Combinator” class is then initiated by providing a name, in a string format. All previously processed single evidence pieces are then added to the combinator class using the function “add_evidence(“Single_Evidence”-class instance)”. Next, the combination is performed by running the "combination()" function. The example notebooks demonstrate in detail how this can be done.
 
 ## Licensing
 
