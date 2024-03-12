@@ -11,13 +11,13 @@ The dst_evidence_combinator can be used in most Windows, Linux or macOS configur
 Download the repository:
 
 ```bash
-git clone https://github.com/phi-grib/dst_evidence_combinator.git
+git clone https://github.com/phi-grib/TOXTRUST.git
 ```
 
 Go to the repository directory 
 
 ```bash
-cd dst_evidence_combinator
+cd TOXTRUST
 ```
 
 and create the **"dst" conda environment** with all the dependencies and extra packages:
