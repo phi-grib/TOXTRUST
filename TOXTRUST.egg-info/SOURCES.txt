@@ -1,0 +1,12 @@
+LICENSE
+README.md
+setup.py
+TOXTRUST.egg-info/PKG-INFO
+TOXTRUST.egg-info/SOURCES.txt
+TOXTRUST.egg-info/dependency_links.txt
+TOXTRUST.egg-info/top_level.txt
+toxtrust/__init__.py
+toxtrust/combination.py
+toxtrust/decision.py
+toxtrust/evidence.py
+toxtrust/visualisation.py

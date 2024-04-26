@@ -1,6 +1,7 @@
 admin_email: admin@domain.org
 admin_name: Admin Name
 config_status: true
-curation_repository_path: F:\My Drive\UPF\projects\dst\TOXTRUST
+endpoints: G:\My Drive\UPF\projects\dst\TOXTRUST\endpoints
+root_repository: G:\My Drive\UPF\projects\dst\TOXTRUST
 homepage: homepage@domain.org
 provider: My Organization

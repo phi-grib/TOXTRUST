@@ -7,7 +7,7 @@ from setuptools.command.develop import develop
 
 setup(
     name='TOXTRUST',
-    version='0.1',
+    version='0.2',
     description='DST-based toxicological evidence combinator',
     license='GNU',
 #    long_description=long_description,

@@ -1,4 +1,4 @@
-name: dst
+name: toxtrust
 channels:
   - default
   - rdkit
@@ -10,15 +10,16 @@ dependencies:
   - scikit-learn
   - scipy
   - setuptools
+  - requests
+  - flask
+  - flask_cors
+  - pyyaml
   - pip:
     - ipython
     - matplotlib
     - numpy
     - pandas
     - pyyaml
-    - rdkit
     - sklearn
     - xlsxwriter
-    - tqdm
-    - cirpy   ### for data curation
-    - bokeh   ### for data curation
+
