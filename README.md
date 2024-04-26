@@ -20,7 +20,7 @@ Go to the repository directory
 cd TOXTRUST
 ```
 
-and create the **"dst" conda environment** with all the dependencies and extra packages:
+and create the **"toxtrust" conda environment** with all the dependencies and extra packages:
 
 ```bash
 conda env create -f environment.yml
@@ -29,7 +29,7 @@ conda env create -f environment.yml
 Once the environment is created type:
 
 ```bash
-source activate dst
+source activate toxtrust
 ```
 
 to activate the environment.
@@ -47,13 +47,13 @@ If you wish to modify the code for development purposes, use pip with the -e fla
 pip install -e .
 ```
 
-In order to work with the TOXTRUST in Jupyter Notebook, the installation is required. You can install the notebook either in the **"base" conda environment** or in the **"dst" conda environment**. Select the appropriate environment, activate it and run
+In order to work with the TOXTRUST in Jupyter Notebook, the installation is required. You can install the notebook either in the **"base" conda environment** or in the **"toxtrust" conda environment**. Select the appropriate environment, activate it and run
 
 ```bash
 pip install notebook
 ```
 
-Then, although not required, it is also recommended to install the ipykernel within the dst environment in order to correctly set the jupyter notebook kernel. Make sure your **"dst" conda environment** is activated in the terminal and run:
+Then, although not required, it is also recommended to install the ipykernel within the toxtrust environment in order to correctly set the jupyter notebook kernel. Make sure your **"toxtrust" conda environment** is activated in the terminal and run:
 
 ```bash
 pip install ipykernel
@@ -62,7 +62,7 @@ pip install ipykernel
 Lastly, to set the kernel run:
 
 ```bash
-python -m ipykernel install --user --name dst --display-name "Python (dst)"
+python -m ipykernel install --user --name toxtrust --display-name "Python (toxtrust)"
 ```
 
 To open jupyter notebook, switch back to the environment in which jupyter is installed and type:
