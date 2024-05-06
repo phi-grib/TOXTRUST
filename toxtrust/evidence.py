@@ -4,11 +4,11 @@ import math
 import itertools
 import os
 
-class singleEvidence:
+class evidence:
     
     def __init__(self, id):
         
-        self.id = id
+        self.id = id #key  {'ames': {evidence: self.evidence, 'results: self.results }  }
         
         self.evidence = {
             'title': None,
@@ -43,6 +43,10 @@ class singleEvidence:
         
         self.basicProbabilityMasses()
         self.beliefPlausibility()
+        
+    def saveItem(self):
+        pass 
+    
         
     def updateEvidence(self, key, value):
        

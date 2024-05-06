@@ -4,7 +4,7 @@ import math
 import itertools
 import os
 
-class evidenceCombination:
+class combination:
     
     def __init__(self, id):
         
@@ -33,25 +33,25 @@ class evidenceCombination:
             'plausibility': None,       
         }
         
-    def addItem(self, singleEvidenceItem):
+    def addItem(self, item):
         
         try:
-            id = singleEvidenceItem.id
-            bps = singleEvidenceItem.results['probabilities']
-            weight = singleEvidenceItem.evidence['weight']
+            id = item.id
+            bpm = item.results['probabilities']
+            weight = item.evidence['weight']
             
-            self.evidence['items'].append(singleEvidenceItem)
-            self.evidence['bpm'][id] = bps
+            self.evidence['items'].append(item)
+            self.evidence['bpm'][id] = bpm
             self.evidence['weights'][id] = weight
         except:
             return False, "Evidence item not found"
         
         self.groundProbabilityMasses()
         
-    def addItemManually(self, id, bps, weight=1):
+    def addItemManually(self, id, bpm, weight=1):
         
         try:
-            self.evidence['bpm'][id] = bps
+            self.evidence['bpm'][id] = bpm
             self.evidence['weights'][id] = weight 
         except:
             return False, "Evidence item not provided correctly"

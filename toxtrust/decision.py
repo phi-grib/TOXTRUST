@@ -4,7 +4,7 @@ import math
 import itertools
 import os
 
-class decisionMaker:
+class decision:
     
     def __init__(self):
 

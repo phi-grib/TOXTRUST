@@ -20,6 +20,5 @@ dependencies:
     - numpy
     - pandas
     - pyyaml
-    - sklearn
     - xlsxwriter
 
