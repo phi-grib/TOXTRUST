@@ -29,8 +29,8 @@ def plotBeliefPlausibility(item, threshold=0.5):
     plt.ylim(bottom = -0.15,top=1.15)
     plt.margins(0.45)
 
-    title = item.evidence['title'] if item.evidence['title'] != None else item.id
-    plt.title(f'{title}', fontsize=13, pad=8)
+    name = item.evidence['name'] #if item.evidence['name'] != None else item.id
+    plt.title(f'{name}', fontsize=13, pad=8)
 
     font = {'color':  'black',
             'weight': 'normal',

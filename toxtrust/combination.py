@@ -6,12 +6,10 @@ import os
 
 class combination:
     
-    def __init__(self, id):
-        
-        self.id = id
+    def __init__(self):
         
         self.evidence = {
-            'title' : None,
+            'name' : None,
             'items' : [],
             'bpm' : {},
             'weights' : {},
@@ -33,6 +31,7 @@ class combination:
             'plausibility': None,       
         }
         
+        
     def addItem(self, item):
         
         try:
@@ -40,7 +39,7 @@ class combination:
             bpm = item.results['probabilities']
             weight = item.evidence['weight']
             
-            self.evidence['items'].append(item)
+            #self.evidence['items'].append(item)
             self.evidence['bpm'][id] = bpm
             self.evidence['weights'][id] = weight
         except:

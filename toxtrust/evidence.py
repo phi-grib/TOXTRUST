@@ -6,12 +6,10 @@ import os
 
 class evidence:
     
-    def __init__(self, id):
-        
-        self.id = id #key  {'ames': {evidence: self.evidence, 'results: self.results }  }
+    def __init__(self):
         
         self.evidence = {
-            'title': None,
+            'name': None,
             'source': None,
             'result': None,
             'reliability': None,
@@ -44,18 +42,22 @@ class evidence:
         self.basicProbabilityMasses()
         self.beliefPlausibility()
         
-    def saveItem(self):
-        pass 
-    
+    # def saveEvidence(self):
         
-    def updateEvidence(self, key, value):
+    #     yaml = load(self.endpointPath, self.endpointName)
+        
+    #     yaml['evidence'][self.id] = {'evidence': self.evidence, 'results': self.results}
+        
+    #     save(yaml, self.endpointPath, self.endpointName)
+        
+    # def updateEvidence(self, key, value): ### maybe not necessary
        
-       evidence = self.evidence
+    #    evidence = self.evidence
        
-       try: 
-            self.addEvidence(evidence.update({key:value}))
-       except:
-           return False, "Evidence piece not indicated correctly"
+    #    try: 
+    #         self.addData(evidence.update({key:value}))
+    #    except:
+    #        return False, "Evidence piece not indicated correctly"
 
     def booleanTest(self, r):
     
@@ -148,6 +150,8 @@ class evidence:
             'negative' : plausibilityNegative,
             'positive' : plausibilityPositive
         }
+
+    ### leave for later ###
 
     def returnBasicProbabilityMasses(self):
         

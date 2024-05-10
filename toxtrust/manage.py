@@ -60,8 +60,7 @@ def removeEndpoint(endpointName):
     try:
         shutil.rmtree(ndir)
     except OSError as e:
-        return False, f'Unable to remove data files for {endpointName}, error: "{e}"'
-
+        return False, f'Endpoint {endpointName} does not exist'
 
 def listEndpoints():
     
@@ -75,3 +74,5 @@ def generateId(size=10, chars=string.ascii_uppercase + string.digits):
     Return a random ID (used for temp files) with uppercase letters and numbers
     '''
     return ''.join(random.choice(chars) for _ in range(size))
+
+

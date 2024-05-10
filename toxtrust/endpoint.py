@@ -2,6 +2,8 @@ import os
 import yaml
 
 from toxtrust.config import endpointPath
+from toxtrust.evidence import evidence
+from toxtrust.combination import combination
 
 class endpoint:
     
@@ -12,10 +14,9 @@ class endpoint:
         
         self.endpoint = {
             'id': None,
-            'chemical':None,
+            'compound':None
             }
     
-        
         self.evidence = {}
         self.combination = {}
         self.results = {}
@@ -88,10 +89,12 @@ class endpoint:
         else:
             self.endpoint[key] = value
             
-    def updateEndpoint(self, input_dict):
-        pass 
-        # if key in self.endpoint:
-        #     self.endpoint[key] = value
-        # # for new keys, create a new element with 'value' key
-        # else:
-        #     self.endpoint[key] = value
+    def setDict(self, info):
+    
+        for key, value in info.items():
+            if key in self.endpoint:
+                self.endpoint[key] = value
+            else:
+                self.endpoint[key] = value
+            
+            
