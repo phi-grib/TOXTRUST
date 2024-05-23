@@ -5,7 +5,7 @@ import string
 import random 
 
 from toxtrust.config import endpointPath, toxtrustPath, endpointRepositoryPath
-from toxtrust.endpoint import endpoint
+from toxtrust.endpoint import Endpoint
 
 def createEndpoint(endpointName):
     
@@ -26,8 +26,8 @@ def createEndpoint(endpointName):
 
     try:
         os.mkdir(ndir)
-        os.mkdir(os.path.join(ndir,'figures'))
-        os.mkdir(os.path.join(ndir,'tables')) 
+        #os.mkdir(os.path.join(ndir,'figures'))
+        #os.mkdir(os.path.join(ndir,'tables')) 
 
     except:
         return False, f'Unable to create data files for {endpointName}'
@@ -39,15 +39,14 @@ def createEndpoint(endpointName):
     except:
         return False, 'Unable to copy template file'
     
-    e = endpoint(endpointName)
+    e = Endpoint(endpointName)
     
     try:
         e.load()
     except:
         return False, f'Loading data for endpoint {endpointName} failed'
 
-    e.setVal('id', generateId() ) 
-
+    e.setVal('id', generateId() )  # put in another place, 
     e.save()
 
 def removeEndpoint(endpointName):

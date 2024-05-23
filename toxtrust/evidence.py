@@ -4,12 +4,12 @@ import math
 import itertools
 import os
 
-class evidence:
+class Evidence:
     
-    def __init__(self):
+    def __init__(self, userInput):
         
         self.evidence = {
-            'name': None,
+            #'name': None,
             'source': None,
             'result': None,
             'reliability': None,
@@ -20,9 +20,12 @@ class evidence:
         self.results = {
             'probabilities': None,
             'belief': None,
-            'plausibility': None        
+            'plausibility': None,
+            #'decision' : None      
         }
         
+        self.addEvidence(userInput)
+    
     def addEvidence(self, data):
 
         try:
@@ -41,23 +44,36 @@ class evidence:
         
         self.basicProbabilityMasses()
         self.beliefPlausibility()
+
+
+    def returnEvidence(self):
         
-    # def saveEvidence(self):
+        evidence = self.evidence.copy()
         
-    #     yaml = load(self.endpointPath, self.endpointName)
+        check = ['source', 'result', 'reliability']
         
-    #     yaml['evidence'][self.id] = {'evidence': self.evidence, 'results': self.results}
+        for key in check:
+            if evidence[key] is None:
+                return False, 'Evidence not processed correctly'
+            else:
+                if isinstance(evidence[key], np.ndarray):
+                    evidence[key] = evidence[key].tolist()
+    
+        return evidence
+                
+    def returnResults(self):
         
-    #     save(yaml, self.endpointPath, self.endpointName)
+        results = self.results.copy()
         
-    # def updateEvidence(self, key, value): ### maybe not necessary
-       
-    #    evidence = self.evidence
-       
-    #    try: 
-    #         self.addData(evidence.update({key:value}))
-    #    except:
-    #        return False, "Evidence piece not indicated correctly"
+        check = ['probabilities', 'belief', 'plausibility']
+        
+        for key in check:
+            if results[key] is None:
+                return False, 'Results not processed correctly'
+            else:
+                results[key] = {key: value.tolist() if isinstance(value, np.float64) else value for key, value in results[key].items() }
+                    
+        return results
 
     def booleanTest(self, r):
     
@@ -174,3 +190,19 @@ class evidence:
             
         return self.results['plausibility']
     
+    # def saveEvidence(self, endpoint, path):
+        
+    #     yaml = load(self.endpointPath, self.endpointName)
+        
+    #     yaml['evidence'][self.id] = {'evidence': self.evidence, 'results': self.results}
+        
+    #     save(yaml, self.endpointPath, self.endpointName)
+        
+    # def updateEvidence(self, key, value): ### maybe not necessary
+       
+    #    evidence = self.evidence
+       
+    #    try: 
+    #         self.addData(evidence.update({key:value}))
+    #    except:
+    #        return False, "Evidence piece not indicated correctly"

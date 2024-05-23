@@ -1,4 +1,23 @@
 endpoint:
-evidence:               
-combination: 
-results: 
+  name: 
+  id:
+  framework: 
+  compound: 
+  confidentiality: 
+input: 
+options:
+  decision: 
+    maxUncertainty: 0.3
+    minBelief: 0.5
+  combination:
+    autoRule: True
+    autoExplanation: None
+    rule: None
+    inagakiScale: 0.5
+    maxUncertainty: 0.3
+    woe: False
+    shouldCombine: []
+evidence: 
+results:
+  evidence:
+  combination:

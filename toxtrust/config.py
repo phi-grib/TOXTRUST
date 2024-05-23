@@ -56,9 +56,9 @@ def endpointRepositoryPath(): ## make this happen before you install anything
 
     return configFile['endpoints_repository']
 
-def endpointPath(endpointName):
+def endpointPath(endpoint):
     
-    return os.path.join(endpointRepositoryPath(), endpointName)
+    return os.path.join(endpointRepositoryPath(), endpoint)
 
 def endpointRepository():      
         

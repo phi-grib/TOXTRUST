@@ -2,10 +2,10 @@ import os
 import yaml
 
 from toxtrust.config import endpointPath
-from toxtrust.evidence import evidence
-from toxtrust.combination import combination
+from toxtrust.evidence import Evidence
+from toxtrust.combination import Combination
 
-class endpoint:
+class Endpoint:
     
     def __init__(self, endpointName):
         
@@ -13,13 +13,34 @@ class endpoint:
         self.path = endpointPath(endpointName)
         
         self.endpoint = {
+            'name': str,
             'id': None,
-            'compound':None
+            'framework' : str,
+            'compound': str,
+            'confidentiality': str    
             }
     
+        self.input = {}
+        self.options = {
+            'decision': {
+                'maxUncertainty': 0.3,
+                'minBelief':0.5
+                },
+            'combination' : {
+                'autoRule' : True,
+                'autoExplanation' : None,
+                'rule': None,
+                'inagakiScale': 0.5,
+                'maxUncertainty': 0.3,
+                'woe' : False,
+                'shouldCombine': []
+            }
+        }
         self.evidence = {}
-        self.combination = {}
-        self.results = {}
+        self.results = {
+            'evidence' : {},
+            'combination': {}   
+        }
         
     def load(self):
                
@@ -27,7 +48,7 @@ class endpoint:
         '''
         # obtain the path and the default name of the raname parameters
         if not os.path.isdir (self.path):
-            return False, f'Endpoint "{self.name}" not found'
+            return False, f'Endpoint "{self.endpoint}" not found'
 
         # load the main class dictionary (p) from this yaml file
         
@@ -46,10 +67,15 @@ class endpoint:
             return False, f'error:{e}'
 
         # validate templateDict
-        keylist = ['endpoint', 'evidence', 'combination', 'results']
+        
+        ## checkkkk 
+        keylist = ['endpoint','input', 'options', 'evidence', 'results']
         for ikey in keylist:
             if templateDict[ikey] != None:
                 self.__dict__[ikey] = templateDict[ikey]
+                
+        return templateDict       
+        
                    
     def save (self):
         ''' saves the template object to a YAML file
@@ -59,8 +85,9 @@ class endpoint:
 
         templateDict = {
             'endpoint': self.endpoint,
-            'evidence': self.evidence, 
-            'combination': self.combination,
+            'input': self.input,
+            'options': self.options, 
+            'evidence': self.evidence,
             'results': self.results
         }
         
@@ -89,12 +116,97 @@ class endpoint:
         else:
             self.endpoint[key] = value
             
-    def setDict(self, info):
+    def endpointInput(self, userEndpoint: dict):
     
-        for key, value in info.items():
-            if key in self.endpoint:
-                self.endpoint[key] = value
+        try:
+            for key, value in userEndpoint.items():
+                if key != 'id':
+                    if key in self.endpoint:
+                        self.endpoint[key] = value 
+        except:
+            return False, 'Evidence keys not matching the required style'   
+        
+    def evidenceInput(self, id: str, userInput: dict):
+        
+        if id == self.name:
+            return False, 'Name already taken'
+        
+        evidenceDict = {
+            #'name': None,
+            'source': None,
+            'result': None,
+            'reliability': None,
+            'relevance' : 'certain',    # default
+            'weight': 1                 # default
+            }
+
+        try:
+            for key, value in userInput.items(): 
+                if key in evidenceDict:
+                    evidenceDict[key] = value
+            self.input[id] = userInput    
+        except:
+            return False, 'Evidence keys not matching the required style'    
+        
+        item = Evidence(userInput)
+        self.evidence[id] = item.returnEvidence()
+        self.results[id] = item.returnResults()
+        
+    def decisionInput(self, userDecision: dict):
+        
+        decisionDict = self.options['decision']
+            
+        try:
+            for key, value in userDecision.items(): 
+                if key in decisionDict:
+                    if value != decisionDict[key] and type(value) == float:
+                        decisionDict[key] = value
+                    return 
+            self.options['decision'] = userDecision    
+        except:
+            return False, 'Decision input not matching the required style'   
+    
+    def combinationRule(self, userRule: str):
+        
+        if userRule not in ['auto', 'Dempster', 'Yager', 'Inagaki']:
+            return False, 'Rule not indicated correctly'
+        elif userRule != 'auto':
+            self.options['combination']['autoRule'] = False
+            self.options['combination']['rule'] = userRule   
+            
+    def combinationInput(self, userCombination: dict):   # userCombination = {'inagakiScale': 0.5, 'maxUncertainty': 0.3,'woe' : False}
+        
+        combinationDict = self.options['combination']
+        
+        try:
+            for key, value in userCombination.items(): 
+                if key in combinationDict:
+                    if value != combinationDict[key]:
+                        combinationDict[key] = value
+            self.options['combination'] = combinationDict   
+        
+        except: 
+            return False, 'Combination options not matching the required style' 
+        
+    def shoudCombine(self, shouldCombine: list):
+        
+        available = []
+        
+        for item in shouldCombine:
+            if item in self.input.keys():
+                available.append(item)
             else:
-                self.endpoint[key] = value
-            
-            
+                return False, f'{item} not available in the provided evidence'
+        
+        self.options['combination']['shouldCombine'] = available
+
+
+    def runCombination(self):
+        
+        
+        combo = Combination(self.options['combination'])
+        
+        # make functions executable!
+        # return and save to self
+    
+                

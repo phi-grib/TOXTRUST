@@ -112,3 +112,23 @@ def plotBeliefPlausibility(item, threshold=0.5):
     
 #     if export_path is not None:
 #         fig.savefig(f'{export_path}',facecolor='white', bbox_inches = 'tight')
+
+
+    def makeDecision(results, user_decision: dict): # results is an item from the yaml results
+        
+        uncertainty = results['probabilities']['uncertain']
+        beliefs = results['beliefs']
+        
+        maxUncertainty = user_decision['maxUncertainty']
+        minBelief = user_decision['minBelief']
+    
+        for key, value in beliefs.items():
+
+            if (uncertainty >= maxUncertainty or value <= minBelief):
+                decision = 'uncertain'
+                
+            else:
+                decision = key
+                break
+
+        return decision

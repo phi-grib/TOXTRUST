@@ -4,58 +4,64 @@ import math
 import itertools
 import os
 
-class combination:
+class Combination:
     
-    def __init__(self):
+    def __init__(self, ruleOptions : dict):
         
         self.evidence = {
-            'name' : None,
+           # 'name' : None,
+            'ids' : should_combine,
             'items' : [],
             'bpm' : {},
             'weights' : {},
             'woe': False,
             'gpm': None           
         }
-        
-        self.rule = {
-            'autoRule': True,
-            'autoExplanation':None,
-            'rule': None,
-            'inagakiScale':0.5,
-            'maxUncertainty': 0.3
-        }
+
+        self.rule = ruleOptions
+
+        # self.rule = {
+        #     'autoRule': True,
+        #     'autoExplanation':None,
+        #     'rule': None,
+        #     'inagakiScale':0.5,
+        #     'maxUncertainty': 0.3,
+        #     'woe': False,
+        #     'shouldCombine' = []
+        # }
         
         self.results = {
             'probabilities': None,
             'belief': None,
             'plausibility': None,       
         }
-        
-        
+    
     def addItem(self, item):
         
-        try:
-            id = item.id
-            bpm = item.results['probabilities']
-            weight = item.evidence['weight']
+        for item in self.evidence[ids]:
             
-            #self.evidence['items'].append(item)
-            self.evidence['bpm'][id] = bpm
-            self.evidence['weights'][id] = weight
-        except:
-            return False, "Evidence item not found"
+            try:
+                id = item.id
+                bpm = item.results['probabilities']
+                weight = item.evidence['weight']
+                
+                #self.evidence['items'].append(item)
+                self.evidence['bpm'][id] = bpm
+                self.evidence['weights'][id] = weight
+            except:
+                return False, "Evidence item not found"
+            
+            self.groundProbabilityMasses()
         
-        self.groundProbabilityMasses()
+    # def addItemManually(self, id, bpm, weight=1):
         
-    def addItemManually(self, id, bpm, weight=1):
+    #     try:
+    #         self.evidence['bpm'][id] = bpm
+    #         self.evidence['weights'][id] = weight 
+    #     except:
+    #         return False, "Evidence item not provided correctly"
         
-        try:
-            self.evidence['bpm'][id] = bpm
-            self.evidence['weights'][id] = weight 
-        except:
-            return False, "Evidence item not provided correctly"
-        
-        self.groundProbabilityMasses()
+    #     self.groundProbabilityMasses()
 
     def returnItemList(self):
         
@@ -77,7 +83,7 @@ class combination:
         
     def weigtOfEvidence(self):
         
-        self.evidence['woe'] = True
+        #self.rule['woe'] = True check!!!!!
         
         if len (self.evidence['bpm']) != 0:
             self.groundProbabilityMasses()
@@ -356,6 +362,25 @@ class combination:
             
         return self.results['plausibility']
 
+    def makeDecision(self):
+    
+        uncertainty = self.results['probabilities']['uncertain']
+        beliefs = self.results['beliefs']
+        
+        maxUncertainty = self.decision['maxUncertainty']
+        minBelief = self.decision['minBelief']
+    
+        for key, value in beliefs.items():
+
+            if (uncertainty >= maxUncertainty or value <= minBelief):
+                decision = 'uncertain'
+                
+            else:
+                decision = key
+                break
+
+        self.decision['decision'] = decision
+        
         
     #def autoRule(self):
     
