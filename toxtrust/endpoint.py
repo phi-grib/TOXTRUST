@@ -37,10 +37,8 @@ class Endpoint:
             }
         }
         self.evidence = {}
-        self.results = {
-            'evidence' : {},
-            'combination': {}   
-        }
+        self.results = {}
+        self.decisions = {}
         
     def load(self):
                
@@ -88,7 +86,8 @@ class Endpoint:
             'input': self.input,
             'options': self.options, 
             'evidence': self.evidence,
-            'results': self.results
+            'results': self.results,
+            'decisions': self.decisions
         }
         
         with open(template,'w') as f:
@@ -161,7 +160,6 @@ class Endpoint:
                 if key in decisionDict:
                     if value != decisionDict[key] and type(value) == float:
                         decisionDict[key] = value
-                    return 
             self.options['decision'] = userDecision    
         except:
             return False, 'Decision input not matching the required style'   
@@ -184,7 +182,7 @@ class Endpoint:
                     if value != combinationDict[key]:
                         combinationDict[key] = value
             self.options['combination'] = combinationDict   
-        
+
         except: 
             return False, 'Combination options not matching the required style' 
         
@@ -199,14 +197,64 @@ class Endpoint:
                 return False, f'{item} not available in the provided evidence'
         
         self.options['combination']['shouldCombine'] = available
-
+        
+        # return True  , ''
 
     def runCombination(self):
         
+        options = self.options['combination']
         
-        combo = Combination(self.options['combination'])
+        combo = Combination(options)
         
-        # make functions executable!
-        # return and save to self
-    
+        if not options['shouldCombine']:
+            return False, 'No item for combination selected'
+        else:
+            for id in options['shouldCombine']:
+                userInput = self.input[id]
                 
+                combo.addItem(id, Evidence(userInput))
+            
+            combo.executeCombination()
+            self.results['combination'] = combo.returnResults()
+        
+    def returnResult(self, id : str, selection = None):
+
+        if id in self.results.keys():
+            result = self.results[id]
+                     
+            if selection == None:
+                return result
+            else:
+                if selection in ['probabilities', 'belief', 'plausibility']:
+                    return result[selection]
+                else:
+                    return False, f'{selection} not computed in the results'
+        else:
+            return False, f'{id} not found in results'
+        
+    def makeDecision(self, id: str):
+        
+        uncertainty = self.results[id]['probabilities']['uncertain']
+        beliefs = self.results[id]['beliefs']
+        
+        maxUncertainty = self.options['decision']['maxUncertainty']
+        minBelief = self.options['decision']['minBelief']
+    
+        for key, value in beliefs.items():
+    
+            if (uncertainty >= maxUncertainty or value <= minBelief):
+                decision = 'uncertain'
+                
+            else:
+                decision = key
+                break
+
+        self.decisions[id] = decision
+        
+    
+    def returnDecision(self, id: str):
+        
+        if id in self.decisions.keys():
+            return self.decisions[id] 
+        else:
+            return False, f'{decision} not found in decisions'

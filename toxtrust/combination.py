@@ -10,48 +10,42 @@ class Combination:
         
         self.evidence = {
            # 'name' : None,
-            'ids' : should_combine,
-            'items' : [],
             'bpm' : {},
             'weights' : {},
-            'woe': False,
             'gpm': None           
         }
 
         self.rule = ruleOptions
 
-        # self.rule = {
-        #     'autoRule': True,
-        #     'autoExplanation':None,
-        #     'rule': None,
-        #     'inagakiScale':0.5,
-        #     'maxUncertainty': 0.3,
-        #     'woe': False,
-        #     'shouldCombine' = []
-        # }
+        #  combination = {
+        #         'autoRule' : True,
+        #         'autoExplanation' : None,
+        #         'rule': None,
+        #         'inagakiScale': 0.5,
+        #         'maxUncertainty': 0.3,
+        #         'woe' : False,
+        #         'shouldCombine': []
+        #     }
         
         self.results = {
             'probabilities': None,
             'belief': None,
-            'plausibility': None,       
+            'plausibility': None    
         }
     
-    def addItem(self, item):
+    def addItem(self, id: str, item):
+
+        try:
+            bpm = item.results['probabilities']
+            weight = item.evidence['weight']
+            
+            #self.evidence['items'].append(item)
+            self.evidence['bpm'][id] = bpm
+            self.evidence['weights'][id] = weight
+        except:
+            return False, "Evidence item not found"
         
-        for item in self.evidence[ids]:
-            
-            try:
-                id = item.id
-                bpm = item.results['probabilities']
-                weight = item.evidence['weight']
-                
-                #self.evidence['items'].append(item)
-                self.evidence['bpm'][id] = bpm
-                self.evidence['weights'][id] = weight
-            except:
-                return False, "Evidence item not found"
-            
-            self.groundProbabilityMasses()
+        self.groundProbabilityMasses()
         
     # def addItemManually(self, id, bpm, weight=1):
         
@@ -63,27 +57,25 @@ class Combination:
         
     #     self.groundProbabilityMasses()
 
-    def returnItemList(self):
+    # def returnItemList(self):
         
-        return [key for key in self.evidence['bpm'].keys()]
+    #     return [key for key in self.evidence['bpm'].keys()]
     
-    def popItem(self, item):
+    # def popItem(self, item):
         
-        try:
-            self.evidence['bpm'].pop(item)
-        except:
-            return False, "Evidence item not indicated correctly"
+    #     try:
+    #         self.evidence['bpm'].pop(item)
+    #     except:
+    #         return False, "Evidence item not indicated correctly"
     
-    def updateWeights(self, id, weight):  
+    # def updateWeights(self, id, weight):  
             
-        if id in self.evidence['weights'].keys() and type(weight) == int:
-            self.evidence['weights'][id] = weight
-        else:
-            return False, "Evidence piece not indicated correctly"
+    #     if id in self.evidence['weights'].keys() and type(weight) == int:
+    #         self.evidence['weights'][id] = weight
+    #     else:
+    #         return False, "Evidence piece not indicated correctly"
         
     def weigtOfEvidence(self):
-        
-        #self.rule['woe'] = True check!!!!!
         
         if len (self.evidence['bpm']) != 0:
             self.groundProbabilityMasses()
@@ -132,7 +124,7 @@ class Combination:
 
     def groundProbabilityMasses(self):
         
-        woe = self.evidence['woe']
+        woe = self.rule['woe']
         data = self.processWeigtOfEvidence() if woe == True else self.evidence['bpm']
         length = len(data.keys())
     
@@ -258,9 +250,9 @@ class Combination:
         except:
             return False, "Scaling factor C not defined correctly"
 
-    def autoRuleMaxUncertainty(self, maxUncertainty): 
+    # def autoRuleMaxUncertainty(self, maxUncertainty): 
         
-        self.rule['maxUncertainty'] = maxUncertainty
+    #     self.rule['maxUncertainty'] = maxUncertainty
     
     def autoRuleSelection(self):
         
@@ -301,33 +293,27 @@ class Combination:
             
             self.rule['autoExplanation'] = autoExplanation
             self.rule['rule'] = 'Inagaki'
-    
-    def ruleSelection(self, rule = 'auto'):
-            
-        try:
-            if rule in ['Dempster', 'Yager', 'Inagaki']:
-                self.rule['autoRule'] = False
-                self.rule['rule'] = rule
-                
-            elif rule == 'auto':
-                try: 
-                    self.autoRuleSelection()
-                except:
-                    return False, "Rule autoselection failed"
-        except:
+        
+    def executeCombination(self):
+        
+        if self.rule['autoRule'] == True:
+            try: 
+                self.autoRuleSelection()
+            except:
+                return False, "Rule autoselection failed"
+        
+        if self.rule['rule'] not in ['Dempster', 'Yager', 'Inagaki']:
             return False, 'Rule not indicated correctly'
+        else:
+            rule = self.rule['rule']
         
-    def executeRule(self):
-        
-        rule = self.rule['rule']
-        
-        if rule == 'Dempster':
-            self.dempsterRule()
-        elif rule == 'Yager':
-            self.yagerRule()
-        elif rule == 'Inagaki':
-            self.inagakiRule()
-
+            if rule == 'Dempster':
+                self.dempsterRule()
+            elif rule == 'Yager':
+                self.yagerRule()
+            elif rule == 'Inagaki':
+                self.inagakiRule()
+    
     def beliefPlausibility(self):
         
         jpm = self.results['probabilities']
@@ -347,39 +333,36 @@ class Combination:
             'negative' : plausibilityNegative,
             'positive' : plausibilityPositive
         }
-
-    def returnBelief(self):
-            
-        if self.results['belief'] == None:
-            self.beliefPlausibility() 
-            
-        return self.results['belief']
-    
-    def returnPlausibility(self):
-            
-        if self.results['plausibility'] == None:
-            self.beliefPlausibility() 
-            
-        return self.results['plausibility']
-
-    def makeDecision(self):
-    
-        uncertainty = self.results['probabilities']['uncertain']
-        beliefs = self.results['beliefs']
         
-        maxUncertainty = self.decision['maxUncertainty']
-        minBelief = self.decision['minBelief']
-    
-        for key, value in beliefs.items():
-
-            if (uncertainty >= maxUncertainty or value <= minBelief):
-                decision = 'uncertain'
+    def returnResults(self):
                 
+        results = self.results.copy()
+        
+        check = ['probabilities', 'belief', 'plausibility']
+        
+        for key in check:
+            if results[key] is None:
+                return False, 'Results not processed correctly'
             else:
-                decision = key
-                break
+                results[key] = {key: value.tolist() if isinstance(value, np.float64) else value for key, value in results[key].items() }
+                    
+        return results   
 
-        self.decision['decision'] = decision
+    # def returnBelief(self):
+            
+    #     if self.results['belief'] == None:
+    #         self.beliefPlausibility() 
+            
+    #     return self.results['belief']
+    
+    # def returnPlausibility(self):
+            
+    #     if self.results['plausibility'] == None:
+    #         self.beliefPlausibility() 
+            
+    #     return self.results['plausibility']
+
+
         
         
     #def autoRule(self):

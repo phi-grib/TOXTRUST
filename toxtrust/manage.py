@@ -65,7 +65,7 @@ def listEndpoints():
     
     listEndpoints = os.listdir(endpointRepositoryPath())
     
-    return listEndpoints
+    return True, listEndpoints
     
 
 def generateId(size=10, chars=string.ascii_uppercase + string.digits):

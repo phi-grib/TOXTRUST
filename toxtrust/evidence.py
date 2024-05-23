@@ -45,7 +45,6 @@ class Evidence:
         self.basicProbabilityMasses()
         self.beliefPlausibility()
 
-
     def returnEvidence(self):
         
         evidence = self.evidence.copy()

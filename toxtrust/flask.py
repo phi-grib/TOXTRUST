@@ -38,7 +38,7 @@ def selectRule(endpointName, rule = 'auto'):
     e = Endpoint(endpointName)
     
     e.load()
-    e.decisionInput(rule)
+    e.combinationRule(rule)
     e.save()
 
 def callCombinationInput(endpointName, combinationDict: dict):    # combinationDict = {'inagakiScale': 0.5, 'maxUncertainty': 0.3,'woe' : False}
@@ -50,7 +50,7 @@ def callCombinationInput(endpointName, combinationDict: dict):    # combinationD
     e.load()
     e.combinationInput(combinationDict)
     e.save()
-
+    
 
 def shouldCombineInput(endpointName, shouldCombine: list):
     
@@ -63,21 +63,23 @@ def shouldCombineInput(endpointName, shouldCombine: list):
     e.save()
 
 
-def runEvidence(): #id
+def returnEvidenceResult(endpointName, id : str, selection = None): #id
     
+    e = Endpoint(endpointName)
+    e.load()
     
-    # check if id in user input
-    # pass data to class Evidence
-    # compute
-    # add results to yaml
-        # evidence [id] = instance.evidence
-        # results['evidence'] = instance.decision
+    return e.returnResult(id , selection)
     
-    pass 
 
-def runCombine(should_combine: list): #pass should combine
-    pass
+def runCombine(endpointName): #pass should combine
+    
+    e = Endpoint(endpointName)
+    
+    e.load()
+    e.runCombination()
+    e.save()
 
-def runDecision(): 
 
-    pass
+def runDecision(endpointName, id : str): 
+
+    e = Endpoint(endpointName)
