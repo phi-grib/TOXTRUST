@@ -48,6 +48,8 @@ def createEndpoint(endpointName):
 
     e.setVal('id', generateId() )  # put in another place, 
     e.save()
+    
+    return True, f'Endpoint {endpointName} successfully created'
 
 def removeEndpoint(endpointName):
     
@@ -60,12 +62,14 @@ def removeEndpoint(endpointName):
         shutil.rmtree(ndir)
     except OSError as e:
         return False, f'Endpoint {endpointName} does not exist'
+    
+    return True, f'Endpoint {endpointName} successfully removed'
 
 def listEndpoints():
     
     listEndpoints = os.listdir(endpointRepositoryPath())
     
-    return True, listEndpoints
+    return listEndpoints
     
 
 def generateId(size=10, chars=string.ascii_uppercase + string.digits):

@@ -4,6 +4,7 @@ import yaml
 from toxtrust.config import endpointPath
 from toxtrust.evidence import Evidence
 from toxtrust.combination import Combination
+from toxtrust.visualisation import plotBeliefPlausibility
 
 class Endpoint:
     
@@ -42,7 +43,7 @@ class Endpoint:
         
     def load(self):
                
-        ''' load the endpoint object from a YAML file
+        ''' loads the endpoint object from a YAML file
         '''
         # obtain the path and the default name of the raname parameters
         if not os.path.isdir (self.path):
@@ -72,10 +73,11 @@ class Endpoint:
             if templateDict[ikey] != None:
                 self.__dict__[ikey] = templateDict[ikey]
                 
-        return templateDict       
+        return templateDict     # temporary   
         
                    
     def save (self):
+        
         ''' saves the template object to a YAML file
         '''
         
@@ -116,21 +118,28 @@ class Endpoint:
             self.endpoint[key] = value
             
     def endpointInput(self, userEndpoint: dict):
+        
+        ''' uses provided dictionary to set self.endpoint values for all requested keys
+        '''
     
         try:
+            # check if keys provided correctly
             for key, value in userEndpoint.items():
                 if key != 'id':
                     if key in self.endpoint:
                         self.endpoint[key] = value 
+            # return True, 'Evidence added correctly'
         except:
             return False, 'Evidence keys not matching the required style'   
+        
+        return True, 'Endpoint information successfully added'   
         
     def evidenceInput(self, id: str, userInput: dict):
         
         if id == self.name:
             return False, 'Name already taken'
         
-        evidenceDict = {
+        evidenceDict = { 
             #'name': None,
             'source': None,
             'result': None,
@@ -232,10 +241,16 @@ class Endpoint:
         else:
             return False, f'{id} not found in results'
         
+    #### make decision and visualisation go to utils (visualisation.py)
+        
     def makeDecision(self, id: str):
         
+        if id != 'combination':
+            if id not in self.input.keys():
+                return False, f'{id} not available in the provided evidence'
+        
         uncertainty = self.results[id]['probabilities']['uncertain']
-        beliefs = self.results[id]['beliefs']
+        beliefs = self.results[id]['belief']
         
         maxUncertainty = self.options['decision']['maxUncertainty']
         minBelief = self.options['decision']['minBelief']
@@ -250,11 +265,20 @@ class Endpoint:
                 break
 
         self.decisions[id] = decision
-        
     
     def returnDecision(self, id: str):
         
         if id in self.decisions.keys():
             return self.decisions[id] 
         else:
-            return False, f'{decision} not found in decisions'
+            return False, f'{id} not found in decisions'
+        
+#    def showIntervals(self, id: str):
+        
+#        item = self.results[id]
+#        threshold = self.options['decision']['minBelief']
+        
+#        plotBeliefPlausibility(item, threshold)
+        
+        
+        

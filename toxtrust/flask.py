@@ -1,6 +1,3 @@
-import os
-import yaml
-import string
 
 from toxtrust.endpoint import Endpoint
 
@@ -11,6 +8,8 @@ def callEndpointInput(endpointName, userEndpoint: dict):
     e.load()
     e.endpointInput(userEndpoint)
     e.save()
+    
+    return True, f'Data for endpoint {endpointName} successfully saved'
 
 def callEvidenceInput(endpointName, id : str, userEvidence : dict):
     
@@ -22,6 +21,7 @@ def callEvidenceInput(endpointName, id : str, userEvidence : dict):
     e.evidenceInput(id, userEvidence)
     e.save()
     
+    return True, f'Evidence {id} for endpoint {endpointName} successfully saved'
 
 def callDecisionInput(endpointName, userDecision : dict):   #### ask whether the user wants to keep defaults or not
     
@@ -32,6 +32,8 @@ def callDecisionInput(endpointName, userDecision : dict):   #### ask whether the
     e.load()
     e.decisionInput(userDecision)
     e.save()
+    
+    return True, f'Decision settings successfully saved for endpoint {endpointName}'
 
 def selectRule(endpointName, rule = 'auto'):
     
@@ -40,6 +42,8 @@ def selectRule(endpointName, rule = 'auto'):
     e.load()
     e.combinationRule(rule)
     e.save()
+    
+    return True, f'{rule} rule selected for endpoint {endpointName}'
 
 def callCombinationInput(endpointName, combinationDict: dict):    # combinationDict = {'inagakiScale': 0.5, 'maxUncertainty': 0.3,'woe' : False}
     
@@ -51,6 +55,7 @@ def callCombinationInput(endpointName, combinationDict: dict):    # combinationD
     e.combinationInput(combinationDict)
     e.save()
     
+    return True, f'Combination options for endpoint {endpointName} successfully saved'
 
 def shouldCombineInput(endpointName, shouldCombine: list):
     
@@ -62,6 +67,7 @@ def shouldCombineInput(endpointName, shouldCombine: list):
     e.shoudCombine(shouldCombine)
     e.save()
 
+    return True, f'Evidence pieces for combination successfully saved for endpoint {endpointName}'
 
 def returnEvidenceResult(endpointName, id : str, selection = None): #id
     
@@ -78,8 +84,37 @@ def runCombine(endpointName): #pass should combine
     e.load()
     e.runCombination()
     e.save()
+    
+    return True, f'Evidence pieces successfully combined for endpoint {endpointName}'
+    
+def returnCombination(endpointName):
+        
+    e = Endpoint(endpointName)
+    
+    e.load()
+    return e.results['combination']
 
-
-def runDecision(endpointName, id : str): 
+def runDecision(endpointName, id = 'combination'): 
 
     e = Endpoint(endpointName)
+    
+    e.load()
+    e.makeDecision(id)
+    e.save()
+    
+    return True, f'Decision successfully made for evidence {id} for endpoint {endpointName}'
+    
+#def returnDecision(endpointName, id: str):
+#    
+#    e = Endpoint(endpointName)
+#    
+#    e.load()
+#    
+#    return e.decisions[id]
+
+
+#def returnForDisplay(endpointName, item,threshold=0.5):
+    
+    ## return data that enters the visualisation function
+    
+    #pass 
