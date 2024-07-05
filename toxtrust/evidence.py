@@ -1,132 +1,137 @@
 import pandas as pd
 import numpy as np
-import math
-import itertools
-import os
 
 class Evidence:
     
-    def __init__(self, userInput):
+    def __init__(self): 
         
         self.evidence = {
-            #'name': None,
-            'source': None,
+            'name': None,   #str
+            'source': None, #str ['qsar','expert','in vitro', 'positive alert', 'negative alert']
             'result': None,
             'reliability': None,
-            'relevance' : 'certain',    # not obligatory
-            'weight': 1                 # not obligatory
+            'relevance' : 'certain',    # not obligatory #str
+            'weight': 1                 # not obligatory #int
         }
         
         self.results = {
             'probabilities': None,
             'belief': None,
-            'plausibility': None,
-            #'decision' : None      
+            'plausibility': None  
+        }
+
+    def addEvidence(self, data):
+        
+        methods = {
+            'name': self.check_name,
+            'source': self.check_source,
+            'result': self.process_result,
+            'reliability': self.process_reliability,
+            'relevance': self.check_relevance,
+            'weight': self.check_weight
         }
         
-        self.addEvidence(userInput)
-    
-    def addEvidence(self, data):
+        output = {}
+        
+        for key, value in data.items():
+            if key in methods:
 
-        try:
-            for key, value in data.items():
-                if value != None:
-                    if key == 'result':
-                        self.evidence[key] = self.processResult(data['source'], value)
-                    elif key == 'reliability':
-                        self.evidence[key] = self.processReliability(value)
-                    else:    
-                        self.evidence[key] = value
-                elif value == None:
-                    pass                
-        except:
-            return False, "Evidence not indicated correctly."
-        
-        self.basicProbabilityMasses()
-        self.beliefPlausibility()
+                if key in ['result','reliability']:
 
-    def returnEvidence(self):
+                    success, result = methods[key](value[0],value[1])
+                    if not success:
+                        return False, f'Processing key {key} resulted in the following error: {result}' # prints error message from these two functions
+                else:
+                    success, result = methods[key](value)
+                    if not success:
+                        return False, f'Processing {key} input indicated as {value} failed'
+                
+                output[key] = result
+            
+        if len(output) == len(self.evidence):
+            self.evidence = output
+            return True, 'Input processed correctly'
+        else:
+            return False, 'Evidence added wrongy'
+            
+    def return_evidence(self):     
+           
+        e = self.evidence.copy()
         
-        evidence = self.evidence.copy()
-        
-        check = ['source', 'result', 'reliability']
+        check = ['result', 'reliability']
         
         for key in check:
-            if evidence[key] is None:
+            if e[key] is None:
                 return False, 'Evidence not processed correctly'
             else:
-                if isinstance(evidence[key], np.ndarray):
-                    evidence[key] = evidence[key].tolist()
+                if isinstance(e[key], np.ndarray):
+                    e[key] = e[key].tolist()
     
-        return evidence
+        return True, e
                 
-    def returnResults(self):
+    def return_results(self):
         
-        results = self.results.copy()
+        r = self.results.copy()
         
         check = ['probabilities', 'belief', 'plausibility']
         
         for key in check:
-            if results[key] is None:
+            if r[key] is None:
                 return False, 'Results not processed correctly'
             else:
-                results[key] = {key: value.tolist() if isinstance(value, np.float64) else value for key, value in results[key].items() }
+                r[key] = {key: value.tolist() if isinstance(value, np.float64) else value for key, value in r[key].items() }
                     
-        return results
+        return r
 
-    def booleanTest(self, r):
+    def check_name(self, value):
+        return isinstance(value, str), value
     
-        return 'boolean' if np.isin(r, [1,0]).all() == True else 'non-boolean'
+    def check_weight(self, value):
+        if value != None:
+            return isinstance(value, int), value
+        else:
+            return True, 1
+
+    def check_source(self, value):
+        return value in ['qsar','expert','in vitro', 'positive alert', 'negative alert'], value
     
-    def processResult(self, source, result): 
+    def check_relevance(self, value):
+        if value != None:
+            return value in ['certain','probable','plausible','equivocal','doubted','improbable','impossible'], value
+        else:
+            return True, 'certain'
+
+    def process_result(self, result:list, proba = None): 
         
-        try:
-            methods = pd.DataFrame({
-                'boolean':['singleClassPositive','singleClassPositive','singleClassPositive','singleClassPositive','singleClassNegative'], 'non-boolean':['twoClassesProbability','singleClassProbability',None,None,None]
-                }, index=['qsar','expert','in vitro', 'positive alert', 'negative alert'])
-
-            evidenceType = methods.at[source.lower(),self.booleanTest(result)]
-
-            if evidenceType == 'twoClassesProbability': # predict proba
-
-                processed = result
-
-            elif evidenceType == 'singleClassProbability': # expert single number
-
-                pos = result/100 if result > 1 else result
-                neg = 1 - pos
-                processed = np.array([neg,pos]).T
-
-            elif evidenceType == 'singleClassPositive': #alert or prediction - predict normal 
-
-                pos = result
-                neg = 1 - pos
-                processed = np.array([neg,pos]).T   ### check how to include the change for the expert, binary one number and level of ignorance
-
-            elif evidenceType == 'singleClassNegative': #alert or prediction - predict normal 
-
-                neg = result
-                pos = 1 - neg
-                processed = np.array([neg,pos]).T
-    
-            return processed
+        outcomes = {
+            'negative' : np.array([1.,0.]),
+            'positive' : np.array([0.,1.]), 
+            'both' : np.array([1.,1.])
+        }
         
-        except:
-            return False, "Processing result failed."
+        if not result:
+            return False, 'No result indicated'
+        elif len(result) == 1:
+            r = outcomes[result[0]]
+        elif len(result) == 2:
+            r = outcomes['both']
 
-    def processReliability(self, reliability):
+        if proba != None and type(proba) == list and sum(proba) <= 1 and len(result) == len(proba):
+            r *= np.array(proba)
+        else:
+            return False, 'Probability not matching results'
+        return True, r
+
+    def process_reliability(self, metric:list, reliability:list):
         
-        try: 
-            if type(reliability) == list:
-                processed = {'negative': reliability[0], 'positive': reliability[1]}
-            else:
-
-                reliability = reliability / 100 if reliability > 1 else reliability
-                processed = {'negative': reliability, 'positive': reliability}
-
-            return processed
-        except:
-            return False, "Processing reliability failed."
+        if len(metric) == 1:
+            r = {'negative': reliability[0], 'positive': reliability[0]} ## this assignment can be done because the multiplication will hide this error
+        elif len(metric) == 2 and metric == ['specificity','sensitivity']:
+            r = {'negative': reliability[0], 'positive': reliability[1]}
+        else: 
+            return False, 'Reliability not indicated correctly'   
+        
+        return True, r
 
     def basicProbabilityMasses(self):
         
@@ -136,15 +141,21 @@ class Evidence:
         reliability = self.evidence['reliability']
         relevance = relevanceDict[self.evidence['relevance']]
         
-        bpaNegative = round(evidence[0] * reliability['negative'] * relevance,2)
-        bpaPositive = round(evidence[1] * reliability['positive'] * relevance,2)
-        ignorance = round(1 - (bpaPositive + bpaNegative),2)
+        try:
+        
+            bpaNegative = round(evidence[0] * reliability['negative'] * relevance,2)
+            bpaPositive = round(evidence[1] * reliability['positive'] * relevance,2)
+            ignorance = round(1 - (bpaPositive + bpaNegative),2)
 
-        self.results['probabilities'] = {             # np.array([bpaNegative, ignorance, bpaPositive])
-            'negative': bpaNegative,
-            'uncertain': ignorance,
-            'positive': bpaPositive
-            }
+            self.results['probabilities'] = {             # np.array([bpaNegative, ignorance, bpaPositive])
+                'negative': bpaNegative,
+                'uncertain': ignorance,
+                'positive': bpaPositive
+                }
+            
+            return True, 'Basic probability masses computed correctly'
+        except:
+            return False, 'Computing basic probability masses failed'
         
     def beliefPlausibility(self):
         
@@ -153,20 +164,23 @@ class Evidence:
         beliefNegative = bpa['negative']  #  belief == plausibility because 
         beliefPositive = bpa['positive'] 
         
-        self.results['belief'] = {
-            'negative' : beliefNegative,
-            'positive' : beliefPositive
-        }
-        
-        plausibilityNegative = 0 if beliefNegative == 0 else beliefNegative + bpa['uncertain']
-        plausibilityPositive = 0 if beliefPositive == 0 else beliefPositive + bpa['uncertain']
+        try:
+            self.results['belief'] = {
+                'negative' : beliefNegative,
+                'positive' : beliefPositive
+            }
+            
+            plausibilityNegative = 0 if beliefNegative == 0 else beliefNegative + bpa['uncertain']
+            plausibilityPositive = 0 if beliefPositive == 0 else beliefPositive + bpa['uncertain']
 
-        self.results['plausibility'] = {
-            'negative' : plausibilityNegative,
-            'positive' : plausibilityPositive
-        }
+            self.results['plausibility'] = {
+                'negative' : plausibilityNegative,
+                'positive' : plausibilityPositive
+            }
 
-    ### leave for later ###
+            return True, 'Belief and plausibility computed correctly'
+        except:
+            return False, 'Computing Belief and plausibility failed'
 
     def returnBasicProbabilityMasses(self):
         
@@ -189,19 +203,3 @@ class Evidence:
             
         return self.results['plausibility']
     
-    # def saveEvidence(self, endpoint, path):
-        
-    #     yaml = load(self.endpointPath, self.endpointName)
-        
-    #     yaml['evidence'][self.id] = {'evidence': self.evidence, 'results': self.results}
-        
-    #     save(yaml, self.endpointPath, self.endpointName)
-        
-    # def updateEvidence(self, key, value): ### maybe not necessary
-       
-    #    evidence = self.evidence
-       
-    #    try: 
-    #         self.addData(evidence.update({key:value}))
-    #    except:
-    #        return False, "Evidence piece not indicated correctly"
