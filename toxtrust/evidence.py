@@ -40,21 +40,30 @@ class Evidence:
 
                     success, result = methods[key](value[0],value[1])
                     if not success:
-                        return False, f'Processing key {key} resulted in the following error: {result}' # prints error message from these two functions
+                        return False, f'Processing key "{key}" resulted in the following error: {result}' # prints error message from these two functions
                 else:
                     success, result = methods[key](value)
                     if not success:
-                        return False, f'Processing {key} input indicated as {value} failed'
+                        return False, f'Processing input for "{key}" indicated as "{value}" failed'
                 
                 output[key] = result
             
         if len(output) == len(self.evidence):
             self.evidence = output
-            return True, 'Input processed correctly'
         else:
             return False, 'Evidence added wrongy'
+        
+        success, message = self.basicProbabilityMasses()
+        if not success:
+            return False, message
+        
+        success, message = self.beliefPlausibility()
+        if not success:
+            return False, message
             
-    def return_evidence(self):     
+        return True, 'Evidence added and processed correctly'    
+        
+    def returnEvidence(self):     
            
         e = self.evidence.copy()
         
@@ -69,7 +78,7 @@ class Evidence:
     
         return True, e
                 
-    def return_results(self):
+    def returnResults(self):
         
         r = self.results.copy()
         
@@ -81,7 +90,7 @@ class Evidence:
             else:
                 r[key] = {key: value.tolist() if isinstance(value, np.float64) else value for key, value in r[key].items() }
                     
-        return r
+        return True, r
 
     def check_name(self, value):
         return isinstance(value, str), value
