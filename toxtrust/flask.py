@@ -141,21 +141,29 @@ def shouldCombineInput(endpointName, shouldCombine: list):
 
 def returnEvidenceResult(endpointName, id : str, selection = None): #id
     
+    """
+    Returns a single evidence object using info stored in the YAML using evidence name.
+    """
+    
     e = Endpoint(endpointName)
     e.load()
     
-    return e.returnResult(id , selection)
+    success, message = e.returnResult(id , selection)
+    if not success:
+        return False, message
     
-
+    return True, message
+    
 def runCombine(endpointName): #pass should combine
     
     e = Endpoint(endpointName)
-    
     e.load()
-    e.runCombination()
-    e.save()
     
-    return True, f'Evidence pieces successfully combined for endpoint {endpointName}'
+    success, message = e.runCombination()
+    if not success:
+        return False, message
+    
+    return True, message
     
 def returnCombination(endpointName):
         

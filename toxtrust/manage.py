@@ -27,7 +27,7 @@ def createEndpoint(endpointName):
     try:
         os.mkdir(ndir)
         #os.mkdir(os.path.join(ndir,'figures'))
-        #os.mkdir(os.path.join(ndir,'tables')) 
+        #os.mkdir(os.path.join(ndir,'stables')) 
 
     except:
         return False, f'Unable to create data files for {endpointName}'
@@ -71,7 +71,6 @@ def listEndpoints():
     
     return listEndpoints
     
-
 def generateId(size=10, chars=string.ascii_uppercase + string.digits):
     '''
     Return a random ID (used for temp files) with uppercase letters and numbers

@@ -68,7 +68,7 @@ class Endpoint:
         # validate templateDict
         
         ## checkkkk 
-        keylist = ['endpoint','input', 'options', 'evidence', 'results', 'decisions']
+        keylist = ['endpoint','input', 'options', 'evidence', 'results']
         for ikey in keylist:
             if templateDict[ikey] != None:
                 self.__dict__[ikey] = templateDict[ikey]
@@ -230,7 +230,7 @@ class Endpoint:
             return False, 'Combination not possible, increase the number of evidence pieces'   
         else:
             for item in shouldCombine:
-                if item in self.input.keys():
+                if item in self.results.keys():
                     available.append(item)
                 else:
                     return False, f'{item} not available in the provided evidence'
@@ -239,37 +239,50 @@ class Endpoint:
         
         return True, 'Evidence pieces for combination saved correctly'
 
-    # def runCombination(self):
+    def returnResult(self, id : str, selection: str):
         
-    #     options = self.options['combination']
-        
-    #     combo = Combination(options)
-        
-    #     if not options['shouldCombine']:
-    #         return False, 'No item for combination selected'
-    #     else:
-    #         for id in options['shouldCombine']:
-    #             userInput = self.input[id]
-                
-    #             combo.addItem(id, Evidence(userInput))
-            
-    #         combo.executeCombination()
-    #         self.results['combination'] = combo.returnResults()
-        
-#     def returnResult(self, id : str, selection = None):
-
-#         if id in self.results.keys():
-#             result = self.results[id]
+        if id in self.results.keys():
+            result = self.results[id]
                      
-#             if selection == None:
-#                 return result
-#             else:
-#                 if selection in ['probabilities', 'belief', 'plausibility']:
-#                     return result[selection]
-#                 else:
-#                     return False, f'{selection} not computed in the results'
-#         else:
-#             return False, f'{id} not found in results'
+            if selection == None:
+                return True, result
+            else:
+                if selection in ['probabilities', 'belief', 'plausibility']:
+                    return True, result[selection]
+                else:
+                    return False, f'{selection} not computed'
+        else:
+            return False, f'{id} not found in results'
+        
+    def runCombination(self):
+        
+        options = self.options['combination']
+        
+        c = Combination(options)
+        
+        if not options['shouldCombine']:
+            return False, 'Evidence pieces for combination not selected'
+        else:
+            for i in options['shouldCombine']: 
+                w =  self.input[i]['weight']
+                bpm = self.returnResult(i, selection='probabilities')
+                
+                success, message = c.addItem(w, bpm)
+                if not success:
+                    return False, message
+                else:
+                    success_, message_ = c.executeCombination()
+                    if not success_:
+                        return False, message_
+                    
+                    else:
+                        success__, result = c.returnResults()
+                        if not success__:
+                            return False, result
+                        else: 
+                            self.results[self.name] = result        
+                            return True, message_
+
         
 #     #### make decision and visualisation go to utils (visualisation.py)
         
