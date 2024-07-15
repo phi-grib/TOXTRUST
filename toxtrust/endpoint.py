@@ -21,7 +21,6 @@ class Endpoint:
             'confidentiality': str    
             }
     
-        self.input = {}
         self.options = {
             'decision': {
                 'maxUncertainty': 0.3,
@@ -34,6 +33,7 @@ class Endpoint:
                 'inagakiScale': 0.5,
                 'maxUncertainty': 0.3,
                 'woe' : False,
+                'weights': [],
                 'shouldCombine': []
             }
         }
@@ -68,7 +68,7 @@ class Endpoint:
         # validate templateDict
         
         ## checkkkk 
-        keylist = ['endpoint','input', 'options', 'evidence', 'results']
+        keylist = ['endpoint', 'options', 'evidence', 'results']
         for ikey in keylist:
             if templateDict[ikey] != None:
                 self.__dict__[ikey] = templateDict[ikey]
@@ -84,7 +84,6 @@ class Endpoint:
 
         templateDict = {
             'endpoint': self.endpoint,
-            'input': self.input,
             'options': self.options, 
             'evidence': self.evidence,
             'results': self.results,
@@ -179,7 +178,7 @@ class Endpoint:
         
         return True, 'Decision input successfully added'  
     
-    def combinationRule(self, userRule: str):
+    def combinationRule(self, userRule: str, factor: str):
         
         if userRule not in ['auto', 'Dempster', 'Yager', 'Inagaki']:
             return False, f'Rule "{userRule}" not available'
@@ -187,37 +186,43 @@ class Endpoint:
             self.options['combination']['autoRule'] = False
             self.options['combination']['rule'] = userRule
             
-        return True, 'Rule selection stored successfully'   
+            message = 'Rule selection successfully completed'   
             
-    def combinationInput(self, userCombination: dict):#, default: bool):   # userCombination = {'inagakiScale': 0.5, 'maxUncertainty': 0.3}
-        
-        combinationDict = self.options['combination']
-        
-        combinationDict = {'inagakiScale': 0.5, 'maxUncertainty': 0.3}
-        
-        # if not type(default) == bool:
-        #     return False, 'Defualt setting not indicated correctly'
-        # elif default == False:
-        for key, value in userCombination.items(): 
-            if key in combinationDict:
-                if type(value) == float:
-                    combinationDict[key] = value
-                elif type(value) == int:  
-                    value = float(value)
-                    combinationDict[key] = value
+            if userRule == 'Inagaki':
+                
+                scaleDict = {'fullDecision': 1, 'partialDecision': 0.75, 'balance':0.5, 'partialUncertainty':0.25, 'fullUncertainty': 0}
+                
+                if factor not in scaleDict.keys():
+                    return False, 'Inagaki factor incorrect'
                 else:
-                    return False, 'Combination input not matching the required style' 
+                    self.options['combination']['inagakiScale'] = scaleDict[factor]
                     
-        self.options['combination'] = combinationDict   
+                message += ', Inagaki factor considered'  
+        else:
+            message = 'Auto-rule selected'
+            return True, message
+            
+        return True, message
+            
+    def combinationUncertainty(self, userUncertainty):
+        
+        if type(userUncertainty) == float:
+            self.options['combination']['maxUncertainty'] = userUncertainty
+        elif type(userUncertainty) == int:  
+            userUncertainty = float(userUncertainty)
+            self.options['combination']['maxUncertainty'] = userUncertainty
+        else:
+            return False, 'Uncertainty input not matching the required style' 
 
-        return True, 'Combination settings successfully updated' 
+        return True, 'Uncertainty settings successfully updated' 
     
-    def shouldWoE(self, WoE: bool):
+    def shouldWoE(self, WoE: bool, weights: list):
         
         if not type(WoE) == bool:
             return False, 'Wrongly defined input for Weight of Evidence'
         elif WoE == True:
             self.options['combination']['woe'] = True
+            self.options['combination']['weights'] = weights
             return True, 'Weight of Evidence added to settings'
         else:
             return True, 'Weight of Evidence excluded from settings'
@@ -250,7 +255,7 @@ class Endpoint:
                 if selection in ['probabilities', 'belief', 'plausibility']:
                     return True, result[selection]
                 else:
-                    return False, f'{selection} not computed'
+                    return False, f'{selection} not available'
         else:
             return False, f'{id} not found in results'
         
@@ -263,27 +268,40 @@ class Endpoint:
         if not options['shouldCombine']:
             return False, 'Evidence pieces for combination not selected'
         else:
-            for i in options['shouldCombine']: 
-                w =  self.input[i]['weight']
-                bpm = self.returnResult(i, selection='probabilities')
+            for num, i in enumerate(options['shouldCombine']): 
+                w =  options['weights'][num]
+                bpm = self.returnResult(i, selection='probabilities')[1]
                 
-                success, message = c.addItem(w, bpm)
+                success, message = c.addItem(i, w, bpm)
                 if not success:
                     return False, message
-                else:
-                    success_, message_ = c.executeCombination()
-                    if not success_:
-                        return False, message_
                     
-                    else:
-                        success__, result = c.returnResults()
-                        if not success__:
-                            return False, result
-                        else: 
-                            self.results[self.name] = result        
-                            return True, message_
+            success_, message_ = c.executeCombination()       
+            if not success_:
+                return False, message_
+                
+            success__, result = c.returnResults()
+            if not success__:
+                return False, result
 
+            self.results[self.name] = result        
+            return True, message_
+
+    def returnCombinationResult(self, selection):
         
+        if self.name in self.results.keys():
+            result = self.results[self.name]
+        else:
+            return False, f'Combination result for endpoint {self.name} not found in results'  
+                     
+        if selection == None:
+            return True, result
+        else:
+            if selection in ['probabilities', 'belief', 'plausibility']:
+                return True, result[selection]
+            else:
+                return False, f'{selection} not available'
+              
 #     #### make decision and visualisation go to utils (visualisation.py)
         
 #     def makeDecision(self, id: str):

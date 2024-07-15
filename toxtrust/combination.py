@@ -3,6 +3,7 @@ import numpy as np
 import math
 import itertools
 import os
+from IPython.display import display
 
 class Combination:
     
@@ -24,6 +25,7 @@ class Combination:
         #         'inagakiScale': 0.5,
         #         'maxUncertainty': 0.3,
         #         'woe' : False,
+        #         'weights': [],
         #         'shouldCombine': []
         #     }
         
@@ -33,17 +35,17 @@ class Combination:
             'plausibility': None    
         }
     
-    def addItem(self, weight: int, probabilities: dict):
+    def addItem(self, id: str, weight: int, probabilities: dict):
         
         if not weight or not probabilities:
             return False, 'Item selected wrongly'
         else:
-            self.evidence['bpm'] = probabilities
-            self.evidence['weights'] = weight
+            # self.evidence['bpm'] = probabilities
+            # self.evidence['weights'] = weight
         
-        self.evidence['bpm'][id] = bpm
-        self.evidence['weights'][id] = weight
-        
+            self.evidence['bpm'][id] = probabilities
+            self.evidence['weights'][id] = weight
+            
         return True, 'Item added correctly to combination'
         
         
@@ -144,7 +146,7 @@ class Combination:
         
             df = pd.DataFrame.from_dict(self.evidence['bpm'],orient='index').rename(columns={"negative": "N", "uncertain": "U", "positive":"P"})
             df.reset_index(inplace=True,drop=True)
-
+            display(df)
             # iterating through the added items
             
             iterationsNegative = list(itertools.product('NU',repeat=length))[:-1:]
@@ -156,9 +158,13 @@ class Combination:
             if not success:
                 return False, gpmNegative + 'for the negative result'
             
+            print(gpmNegative)
+            
             success, gpmPositive = self.processGroundProbabilityMasses(df, iterationsPositive)
             if not success:
-                return False, gpmNegative + 'for the positive result'
+                return False, gpmPositive + 'for the positive result'
+            
+            print(gpmNegative)
             
             gpmUncertain = df['U'].prod()
             gpmConflict = 1 - (gpmNegative + gpmPositive + gpmUncertain)
@@ -170,6 +176,7 @@ class Combination:
                 'conflict': gpmConflict
                 }
             
+            print(self.evidence['gpm'])
             return True, 'Ground probability masses computed successfully'
         except:
             return False, 'Processing ground probability masses failed'
@@ -198,8 +205,6 @@ class Combination:
             'uncertain': ignorance,
             'positive': jpmPositive
             }
-
-            # self.beliefPlausibility()
             
             return True, 'Dempster combination executed successfully'
         except:
@@ -227,14 +232,12 @@ class Combination:
             'positive': jpmPositive
             }
             
-            # self.beliefPlausibility()
-            
             return True, 'Yager combination executed successfully'
         except:
             return False, 'Yager combination rule failed'
         
     def inagakiRule(self):
-
+        
         try:
             gpmNegative = self.evidence['gpm']['negative']
             gpmPositive = self.evidence['gpm']['positive']
@@ -263,19 +266,6 @@ class Combination:
         except:
             return False, 'Inagaki combination rule failed'
         
-    # def inagakiScale(self, verbal = 'balance', manual = None): 
-        
-    #     scaleDict = {'fullDecision': 1, 'partialDecision': 0.75, 'balance':0.5, 'partialUncertainty':0.25, 'fullUncertainty': 0}
-        
-    #     try:
-    #         if manual != None:
-    #             self.rule['inagakiScale'] = manual
-    #         elif verbal in scaleDict.keys():
-    #             self.rule['inagakiScale'] = scaleDict[verbal]
-                
-    #         return True, 'Inagaki scalling successfully completed'
-    #     except:
-    #         return False, "Scaling factor C not defined correctly"
 
     # def autoRuleMaxUncertainty(self, maxUncertainty): 
         

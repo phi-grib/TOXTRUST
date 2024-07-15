@@ -179,8 +179,8 @@ class Evidence:
                 'positive' : beliefPositive
             }
             
-            plausibilityNegative = 0 if beliefNegative == 0 else beliefNegative + bpa['uncertain']
-            plausibilityPositive = 0 if beliefPositive == 0 else beliefPositive + bpa['uncertain']
+            plausibilityNegative = round(0 if beliefNegative == 0 else beliefNegative + bpa['uncertain'],2)
+            plausibilityPositive = round(0 if beliefPositive == 0 else beliefPositive + bpa['uncertain'],2)
 
             self.results['plausibility'] = {
                 'negative' : plausibilityNegative,
