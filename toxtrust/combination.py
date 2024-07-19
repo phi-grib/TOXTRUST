@@ -4,7 +4,6 @@ import math
 import itertools
 import os
 from IPython.display import display
-
 class Combination:
     
     def __init__(self, ruleOptions : dict):
@@ -99,7 +98,6 @@ class Combination:
                     
                     woeDict[newKey] = value
                     count += 1
-
             return True, woeDict
         except:
             return False, "Weighting evidence failed"
@@ -143,12 +141,10 @@ class Combination:
         
         try: 
             length = len(data.keys())
-        
-            df = pd.DataFrame.from_dict(self.evidence['bpm'],orient='index').rename(columns={"negative": "N", "uncertain": "U", "positive":"P"})
+            df = pd.DataFrame.from_dict(data,orient='index').rename(columns={"negative": "N", "uncertain": "U", "positive":"P"})
             df.reset_index(inplace=True,drop=True)
-            display(df)
             # iterating through the added items
-            
+
             iterationsNegative = list(itertools.product('NU',repeat=length))[:-1:]
             iterationsPositive = list(itertools.product('PU',repeat=length))[:-1:]
 
@@ -158,13 +154,9 @@ class Combination:
             if not success:
                 return False, gpmNegative + 'for the negative result'
             
-            print(gpmNegative)
-            
             success, gpmPositive = self.processGroundProbabilityMasses(df, iterationsPositive)
             if not success:
                 return False, gpmPositive + 'for the positive result'
-            
-            print(gpmNegative)
             
             gpmUncertain = df['U'].prod()
             gpmConflict = 1 - (gpmNegative + gpmPositive + gpmUncertain)
@@ -176,7 +168,6 @@ class Combination:
                 'conflict': gpmConflict
                 }
             
-            print(self.evidence['gpm'])
             return True, 'Ground probability masses computed successfully'
         except:
             return False, 'Processing ground probability masses failed'
@@ -197,7 +188,7 @@ class Combination:
             
             combination = np.array([jpmNegative, ignorance, jpmPositive])
 
-            while combination.sum() < 1.0:
+            while not math.isclose(combination.sum(), 1.0, abs_tol=0.01):
                 ignorance += 0.01
                 
             self.results['probabilities'] = {             
@@ -217,13 +208,16 @@ class Combination:
             gpmPositive = self.evidence['gpm']['positive']
             gpmUncertain = self.evidence['gpm']['uncertain']        
 
+            print(gpmNegative)
+            print(gpmPositive)
+
             jpmNegative = round(gpmNegative,2)
             jpmPositive = round(gpmPositive,2)
             ignorance = round(1 - (gpmNegative + gpmPositive),2)
         
             combination = np.array([jpmNegative, ignorance, jpmPositive])
-            
-            while combination.sum() < 1.0:
+
+            while not math.isclose(combination.sum(), 1.0, abs_tol=0.01):
                 ignorance += 0.01
                 
             self.results['probabilities'] = {             
@@ -231,6 +225,7 @@ class Combination:
             'uncertain': ignorance,
             'positive': jpmPositive
             }
+            
             
             return True, 'Yager combination executed successfully'
         except:
@@ -252,7 +247,7 @@ class Combination:
             
             combination = np.array([jpmNegative, ignorance, jpmPositive])
                     
-            while combination.sum() < 1.0:
+            while not math.isclose(combination.sum(), 1.0, abs_tol=0.01):
                 ignorance += 0.01
                 
             self.results['probabilities'] = {             
@@ -293,21 +288,20 @@ class Combination:
                 
             if len(set(result)) == 1:
                 
-                autoExplanation = "Choosing Dempster\'s rule: Agreement between sources and none exceeding the uncertainty threshold."
+                autoExplanation = 'Executed Dempster\'s rule: Agreement between sources and none exceeding the uncertainty threshold.'
                 
                 self.rule['autoExplanation'] = autoExplanation
                 self.rule['rule'] = 'Dempster'
                 
             elif 'u' in set(result):
                 
-                autoExplanation = "Choosing Yager\'s rule: Uncertainty threshold exceeded."
+                autoExplanation = 'Executed Yager\'s rule: Uncertainty threshold exceeded.'
                 
                 self.rule['autoExplanation'] = autoExplanation
                 self.rule['rule'] = 'Yager'
                 
             else: 
-
-                autoExplanation = "Choosing Inagaki\'s rule: No agreement between sources."
+                autoExplanation = 'Executed Inagaki\'s rule: No agreement between sources.'
                 
                 self.rule['autoExplanation'] = autoExplanation
                 self.rule['rule'] = 'Inagaki'
@@ -317,6 +311,8 @@ class Combination:
             return False, 'Rule autoselection failed'
         
     def executeCombination(self):
+        
+        self.rule['autoExplanation'] = None
         
         success, message = self.groundProbabilityMasses()
         if not success:
@@ -328,7 +324,7 @@ class Combination:
             success, message = self.autoRuleSelection()
             if not success:
                 return False, message                
-        
+
         if self.rule['rule'] not in ['Dempster', 'Yager', 'Inagaki']:
             return False, 'Rule not indicated correctly'
         else:
@@ -349,7 +345,10 @@ class Combination:
                 if not success_:
                     return False, message_
                 else:
-                    return True, 'Combination of evidence successfully completed'
+                    if type(self.rule['autoExplanation']) == str:
+                        return True, 'Combination of evidence successfully completed. ' + self.rule['autoExplanation']
+                    else:
+                        return True, 'Combination of evidence successfully completed'
             
     def beliefPlausibility(self):
         
@@ -364,8 +363,8 @@ class Combination:
                 'positive' : beliefPositive
             }
             
-            plausibilityNegative = 0 if beliefNegative == 0 else beliefNegative + jpm['uncertain']
-            plausibilityPositive = 0 if beliefPositive == 0 else beliefPositive + jpm['uncertain']
+            plausibilityNegative = round(0 if beliefNegative == 0 else beliefNegative + jpm['uncertain'],2)
+            plausibilityPositive = round(0 if beliefPositive == 0 else beliefPositive + jpm['uncertain'],2)
 
             self.results['plausibility'] = {
                 'negative' : plausibilityNegative,

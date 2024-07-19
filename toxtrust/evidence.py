@@ -124,7 +124,7 @@ class Evidence:
             r = outcomes[result[0]]
         elif len(result) == 2:
             r = outcomes['both']
-
+        
         if proba != None and type(proba) == list and sum(proba) <= 1 and len(result) == len(proba):
             r *= np.array(proba)
         else:

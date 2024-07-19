@@ -68,7 +68,7 @@ class Endpoint:
         # validate templateDict
         
         ## checkkkk 
-        keylist = ['endpoint', 'options', 'evidence', 'results']
+        keylist = ['endpoint', 'options', 'evidence', 'results', 'decisions']
         for ikey in keylist:
             if templateDict[ikey] != None:
                 self.__dict__[ikey] = templateDict[ikey]
@@ -184,9 +184,9 @@ class Endpoint:
             return False, f'Rule "{userRule}" not available'
         elif userRule != 'auto':
             self.options['combination']['autoRule'] = False
-            self.options['combination']['rule'] = userRule
+            self.options['combination']['rule'] = userRule 
             
-            message = 'Rule selection successfully completed'   
+            message = 'Rule selection successfully completed'  
             
             if userRule == 'Inagaki':
                 
@@ -199,6 +199,9 @@ class Endpoint:
                     
                 message += ', Inagaki factor considered'  
         else:
+            self.options['combination']['autoRule'] = True
+
+            
             message = 'Auto-rule selected'
             return True, message
             
@@ -220,12 +223,14 @@ class Endpoint:
         
         if not type(WoE) == bool:
             return False, 'Wrongly defined input for Weight of Evidence'
-        elif WoE == True:
-            self.options['combination']['woe'] = True
-            self.options['combination']['weights'] = weights
-            return True, 'Weight of Evidence added to settings'
         else:
-            return True, 'Weight of Evidence excluded from settings'
+            self.options['combination']['woe'] = WoE
+            self.options['combination']['weights'] = weights            
+            
+            if WoE == True:
+                return True, 'Weight of Evidence added to settings'
+            else:
+                return True, 'Weight of Evidence excluded from settings'
 
     def shoudCombine(self, shouldCombine: list):
         
@@ -300,39 +305,43 @@ class Endpoint:
             if selection in ['probabilities', 'belief', 'plausibility']:
                 return True, result[selection]
             else:
-                return False, f'{selection} not available'
-              
-#     #### make decision and visualisation go to utils (visualisation.py)
-        
-#     def makeDecision(self, id: str):
-        
-#         if id != 'combination':
-#             if id not in self.input.keys():
-#                 return False, f'{id} not available in the provided evidence'
-        
-#         uncertainty = self.results[id]['probabilities']['uncertain']
-#         beliefs = self.results[id]['belief']
-        
-#         maxUncertainty = self.options['decision']['maxUncertainty']
-#         minBelief = self.options['decision']['minBelief']
-    
-#         for key, value in beliefs.items():
-    
-#             if (uncertainty >= maxUncertainty or value <= minBelief):
-#                 decision = 'uncertain'
-                
-#             else:
-#                 decision = key
-#                 break
+                return False, f'{selection} not available'  
 
-#         self.decisions[id] = decision
+    def makeDecision(self, selection: str):
+
+        if selection not in self.results.keys():
+            return False, f'No results computed for "{selection}", decision-features not available'
     
-#     def returnDecision(self, id: str):
+        uncertainty = self.results[selection]['probabilities']['uncertain']
+        beliefs = self.results[selection]['belief']
         
-#         if id in self.decisions.keys():
-#             return self.decisions[id] 
-#         else:
-#             return False, f'{id} not found in decisions'
+        maxUncertainty = self.options['decision']['maxUncertainty']
+        minBelief = self.options['decision']['minBelief']
+    
+        for key, value in beliefs.items():
+    
+            if (uncertainty >= maxUncertainty or value <= minBelief):
+                decision = 'uncertain'
+                
+            else:
+                decision = key
+                break
+
+        self.decisions[selection] = decision
+        
+        return True, f'Decision making for {selection} successfully completed'
+    
+    def returnDecision(self, selection: str):
+        
+        print(self.decisions.keys())
+        
+        if selection in self.decisions.keys():
+            decision = self.decisions[selection]
+            print(decision)
+            return True, decision
+        else:
+            return False, f'Check if results were computed for "{selection}" and make a decision first.'
+
         
 # #    def showIntervals(self, id: str):
         

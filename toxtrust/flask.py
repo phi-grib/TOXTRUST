@@ -137,9 +137,9 @@ def shouldWoeInput(endpointName, WoE=False): ##
     if len(s) == 0:
         return False, 'Evidence pieces for combination not selected'
     
-    if WoE == True:
-        for i in s:
-            weights.append(e.evidence[i]['weight'])
+    for i in s:
+        weights.append(e.evidence[i]['weight'])
+    
     
     success, message = e.shouldWoE(WoE, weights)
     if not success:
@@ -194,31 +194,39 @@ def returnCombination(endpointName, selection = None):
         return False, result
     
     return True, result
+
+def runDecisionFunction(endpointName, selection: str): 
     
-
-
-
-
-
-
-
-def runDecision(endpointName, id = 'combination'): 
+    """
+    Makes a decision for the selected evidence piece or the combination. 
+    """
 
     e = Endpoint(endpointName)
-    
     e.load()
-    e.makeDecision(id)
+    
+    success, message = e.makeDecision(selection)
+    if not success:
+        return False, message
+    
     e.save()
+    return True, message
     
-    return True, f'Decision successfully made for evidence {id} for endpoint {endpointName}'
+def returnDecisionResult(endpointName, selection: str): 
     
-def returnDecision(endpointName, id: str):
+    """
+    Makes a decision for the selected evidence piece or the combination. 
+    """
     
     e = Endpoint(endpointName)
-    
     e.load()
     
-    return e.decisions[id]
+    success, result = e.returnDecision(selection)
+    if not success:
+        return False, result
+    
+    return True, result
+
+
 
 
 #def returnForDisplay(endpointName, item,threshold=0.5):
