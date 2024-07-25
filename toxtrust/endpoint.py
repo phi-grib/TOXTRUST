@@ -1,10 +1,11 @@
 import os
 import yaml
+import numpy as np
 
 from toxtrust.config import endpointPath
 from toxtrust.evidence import Evidence
 from toxtrust.combination import Combination
-from toxtrust.visualisation import plotBeliefPlausibility
+from toxtrust.visualisation import beliefPlausibility, visualiseProbabilities
 
 class Endpoint:
     
@@ -249,7 +250,7 @@ class Endpoint:
         
         return True, 'Evidence pieces for combination saved correctly'
 
-    def returnResult(self, id : str, selection: str):
+    def returnResult(self, id : str, selection):
         
         if id in self.results.keys():
             result = self.results[id]
@@ -261,8 +262,10 @@ class Endpoint:
                     return True, result[selection]
                 else:
                     return False, f'{selection} not available'
+        elif id in self.evidence.keys() or id == self.name:
+            return False, f'{id} not yet computed'
         else:
-            return False, f'{id} not found in results'
+            return False, 'Error returning result'
         
     def runCombination(self):
         
@@ -292,20 +295,20 @@ class Endpoint:
             self.results[self.name] = result        
             return True, message_
 
-    def returnCombinationResult(self, selection):
+    # def returnCombinationResult(self, selection):
         
-        if self.name in self.results.keys():
-            result = self.results[self.name]
-        else:
-            return False, f'Combination result for endpoint {self.name} not found in results'  
+    #     if self.name in self.results.keys():
+    #         result = self.results[self.name]
+    #     else:
+    #         return False, f'Combination result for endpoint {self.name} not found in results'  
                      
-        if selection == None:
-            return True, result
-        else:
-            if selection in ['probabilities', 'belief', 'plausibility']:
-                return True, result[selection]
-            else:
-                return False, f'{selection} not available'  
+    #     if selection == None:
+    #         return True, result
+    #     else:
+    #         if selection in ['probabilities', 'belief', 'plausibility']:
+    #             return True, result[selection]
+    #         else:
+    #             return False, f'{selection} not available'  
 
     def makeDecision(self, selection: str):
 
@@ -333,22 +336,52 @@ class Endpoint:
     
     def returnDecision(self, selection: str):
         
-        print(self.decisions.keys())
-        
         if selection in self.decisions.keys():
             decision = self.decisions[selection]
-            print(decision)
             return True, decision
         else:
             return False, f'Check if results were computed for "{selection}" and make a decision first.'
 
+ 
+    def probabilityIntervals(self, id: str):
         
-# #    def showIntervals(self, id: str):
+        if id in self.results.keys():
+            result = self.results[id]
+
+        elif id in self.evidence.keys() or id == self.name:
+            return False, f'{id} not yet computed'
+        else:
+            return False, 'Error returning result'
         
-# #        item = self.results[id]
-# #        threshold = self.options['decision']['minBelief']
+        path = self.path
+        threshold = self.options['decision']['minBelief']
         
-# #        plotBeliefPlausibility(item, threshold)
+        success, message = beliefPlausibility(id, result, threshold, path)
         
+        return success, message
+ 
+    def combinationIntervals(self):
+        
+        if self.name in self.results.keys():
+            names = self.options['combination']['shouldCombine']
+
+            if len(names) > 1:
+                names.append(self.name)
+                data = []
+                
+                for n in names:
+                    values = self.results[n]['probabilities'].values()
+                    data.append(list(values))
+                
+                data = np.array(data)
+                labels = ['combination' if item == self.name else item for item in names]
+                path = self.path
+                
+                success, message = visualiseProbabilities(labels, data, path)
+        
+                return success, message
+            
+        else:
+            return False, 'Results to display not available'
         
         

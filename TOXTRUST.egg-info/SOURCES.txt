@@ -7,6 +7,14 @@ TOXTRUST.egg-info/dependency_links.txt
 TOXTRUST.egg-info/top_level.txt
 toxtrust/__init__.py
 toxtrust/combination.py
+toxtrust/config.py
+toxtrust/config.yaml
+toxtrust/data.py
 toxtrust/decision.py
+toxtrust/endpoint.py
 toxtrust/evidence.py
+toxtrust/flask.py
+toxtrust/george.py
+toxtrust/manage.py
+toxtrust/todo.py
 toxtrust/visualisation.py

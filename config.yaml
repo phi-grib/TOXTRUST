@@ -1,7 +1,7 @@
 admin_email: admin@domain.org
 admin_name: Admin Name
 config_status: true
-endpoints_repository: F:\My Drive\UPF\projects\dst\TOXTRUST\endpoints
+endpoints_repository: j:\my drive\upf\projects\dst\toxtrust\endpoints
 homepage: homepage@domain.org
 provider: My Organization
-toxtrust_repository: F:\My Drive\UPF\projects\dst\TOXTRUST
+toxtrust_repository: j:\my drive\upf\projects\dst\toxtrust

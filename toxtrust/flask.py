@@ -1,5 +1,6 @@
 from toxtrust.endpoint import Endpoint
 
+
 def callEndpointInput(endpointName, userEndpoint: dict):
     
     """
@@ -149,7 +150,7 @@ def shouldWoeInput(endpointName, WoE=False): ##
     
     return True, message
 
-def returnEvidenceResult(endpointName, id : str, selection = None): #id
+def returnComputedResult(endpointName, id : str, selection = None): #id
     
     """
     Returns a single evidence object using info stored in the YAML using evidence name.
@@ -180,20 +181,20 @@ def runCombine(endpointName): #pass should combine
     e.save()
     return True, result
     
-def returnCombination(endpointName, selection = None): 
+# def returnCombination(endpointName, selection = None): 
     
-    """
-    Return evidence after combination.
-    """
+#     """
+#     Return evidence after combination.
+#     """
  
-    e = Endpoint(endpointName)
-    e.load()
+#     e = Endpoint(endpointName)
+#     e.load()
     
-    success, result = e.returnCombinationResult(selection) 
-    if not success:
-        return False, result
+#     success, result = e.returnCombinationResult(selection) 
+#     if not success:
+#         return False, result
     
-    return True, result
+#     return True, result
 
 def runDecisionFunction(endpointName, selection: str): 
     
@@ -225,6 +226,31 @@ def returnDecisionResult(endpointName, selection: str):
         return False, result
     
     return True, result
+
+
+def plotIntervals(endpointName, id: str): 
+    
+    """
+    Generates an interval plot and stores in the endpoint folder.
+    """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    success, message = e.probabilityIntervals(id)
+    return success, message
+
+def plotProbabilities(endpointName): 
+    
+    """
+    Generates a probability plot and stores in the endpoint folder.
+    """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    success, message = e.combinationIntervals()
+    return success, message
 
 
 
