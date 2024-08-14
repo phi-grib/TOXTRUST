@@ -37,8 +37,10 @@ class Evidence:
             if key in methods:
 
                 if key in ['result','reliability']:
-
-                    success, result = methods[key](value[0],value[1])
+                    
+                    inputs = list(value.values())
+                    
+                    success, result = methods[key](inputs[0],inputs[1])
                     if not success:
                         return False, f'Processing key "{key}" resulted in the following error: {result}' # prints error message from these two functions
                 else:
