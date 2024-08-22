@@ -132,7 +132,7 @@ class Evidence:
             r = outcomes['both']
             proba = True  ## with this the user is forced to add probability to the results !! if both classes are used
         
-        if proba == True:
+        if proba == True and len(result) == len(proba):
             if num != None and type(num) == list and sum(num) <= 1 and len(result) == len(num):
                 r *= np.array(num)
             else:
