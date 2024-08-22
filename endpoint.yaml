@@ -17,7 +17,9 @@ options:
     woe: False
     weights: []
     shouldCombine: []
-evidence: 
+evidence:
+evidenceRaw:  
 results:
-decisions: 
+decisions:
+
 

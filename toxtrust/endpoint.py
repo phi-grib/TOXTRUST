@@ -39,6 +39,7 @@ class Endpoint:
             }
         }
         self.evidence = {}
+        self.evidenceRaw = {}
         self.results = {}
         self.decisions = {}
         
@@ -69,7 +70,7 @@ class Endpoint:
         # validate templateDict
         
         ## checkkkk 
-        keylist = ['endpoint', 'options', 'evidence', 'results', 'decisions']
+        keylist = ['endpoint', 'options', 'evidence', 'evidenceRaw', 'results', 'decisions']
         for ikey in keylist:
             if templateDict[ikey] != None:
                 self.__dict__[ikey] = templateDict[ikey]
@@ -87,6 +88,7 @@ class Endpoint:
             'endpoint': self.endpoint,
             'options': self.options, 
             'evidence': self.evidence,
+            'evidenceRaw': self.evidenceRaw,
             'results': self.results,
             'decisions': self.decisions
         }
@@ -152,6 +154,7 @@ class Endpoint:
             
             identifier = evidence['name'] ## stored in the yaml with the added "name" as key
             self.evidence[identifier] = evidence
+            self.evidenceRaw[identifier] = userInput
             
             success_, results = i.returnResults()
             

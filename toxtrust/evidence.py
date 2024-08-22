@@ -32,7 +32,7 @@ class Evidence:
         }
         
         output = {}
-        
+        r = data['result']['outcome']
         for key, value in data.items():
             if key in methods:
 
@@ -40,7 +40,8 @@ class Evidence:
                     
                     inputs = list(value.values())
                     
-                    success, result = methods[key](inputs[0],inputs[1])
+                    success, result = methods[key](r, inputs[-2],inputs[-1])
+                    
                     if not success:
                         return False, f'Processing key "{key}" resulted in the following error: {result}' # prints error message from these two functions
                 else:
@@ -99,12 +100,15 @@ class Evidence:
     
     def check_weight(self, value):
         if value != None:
-            return isinstance(value, int), value
+            if value <= 5:
+                return isinstance(value, int), value
+            else: 
+                return False, value
         else:
             return True, 1
 
     def check_source(self, value):
-        return value in ['qsar','expert','in vitro', 'positive alert', 'negative alert'], value
+        return value in ['qsar','expert','in vitro', 'alert'], value
     
     def check_relevance(self, value):
         if value != None:
@@ -112,7 +116,7 @@ class Evidence:
         else:
             return True, 'certain'
 
-    def process_result(self, result:list, proba = None): 
+    def process_result(self, result:list, proba = False, num = None): 
         
         outcomes = {
             'negative' : np.array([1.,0.]),
@@ -126,22 +130,27 @@ class Evidence:
             r = outcomes[result[0]]
         elif len(result) == 2:
             r = outcomes['both']
+            proba = True  ## with this the user is forced to add probability to the results !! if both classes are used
         
-        if proba != None and type(proba) == list and sum(proba) <= 1 and len(result) == len(proba):
-            r *= np.array(proba)
-        else:
-            return False, 'Probability not matching results'
+        if proba == True:
+            if num != None and type(num) == list and sum(num) <= 1 and len(result) == len(num):
+                r *= np.array(num)
+            else:
+                return False, 'Probability not matching results'
         return True, r
 
-    def process_reliability(self, metric:list, reliability:list):
+    def process_reliability(self, result:list, metric:list, reliability:list): # rel:dict
         
-        if len(metric) == 1:
-            r = {'negative': reliability[0], 'positive': reliability[0]} ## this assignment can be done because the multiplication will hide this error
-        elif len(metric) == 2 and metric == ['specificity','sensitivity']:
-            r = {'negative': reliability[0], 'positive': reliability[1]}
+        r = {'negative': 0, 'positive': 0}
+        
+        if not metric or not reliability:
+            return False, 'Reliability not indicated correctly'
+        elif not (len(metric) == len(reliability) == len(result)):
+            return False, 'Lenght of indicators not matching'
         else: 
-            return False, 'Reliability not indicated correctly'   
-        
+            for i, value in enumerate(result):
+                r[value] = reliability[i]
+
         return True, r
 
     def basicProbabilityMasses(self):
