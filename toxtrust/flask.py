@@ -56,6 +56,22 @@ def callEvidenceInput(endpointName, userEvidence : dict):
     e.save()
     return True, message
 
+def removeEvidence(endpointName, id : str):
+    
+    """"
+    Removes the selected evidence piece by accessing it's name from the yaml file.
+    """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    success, message = e.deleteEvidence(id)
+    if not success:
+        return False, message
+    
+    e.save()
+    return True, message   
+
 def returnEvidenceInput(endpointName):
     
     """ Returns added evidence to the yaml file. """

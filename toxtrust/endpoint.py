@@ -164,6 +164,17 @@ class Endpoint:
                 self.results[identifier] = results
     
         return True, message  
+    
+    def deleteEvidence(self, id: str):
+
+        if id in self.evidence.keys():
+            self.evidence.pop(id)
+            self.evidenceRaw.pop(id)
+            self.results.pop(id)
+            
+            return True, 'Evidence piece removed'
+        else:
+            return False, 'Accessing evidence failed'     
          
     def decisionInput(self, userDecision: dict):
         
