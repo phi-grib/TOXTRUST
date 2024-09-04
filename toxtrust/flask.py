@@ -1,4 +1,6 @@
+import os
 from toxtrust.endpoint import Endpoint
+
 
 
 def callEndpointInput(endpointName, userEndpoint: dict):
@@ -68,7 +70,7 @@ def pathEvidencePlot(endpointName, id : int):
         return False, content
     
     if id in e.results.keys():
-        path_plot = e.path + '\\' + id + '.png'
+        path_plot = os.path.join(e.path, id + '.png')
         return True, path_plot
     else:
         return False, f'Path for {id} cannot be created'

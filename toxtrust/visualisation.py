@@ -55,7 +55,7 @@ def beliefPlausibility(name, item, threshold, path):
 
         plt.axhline(y = threshold, color = 'r', linestyle = 'dashed')  
         
-        savePath = path + '\\' + name + '.png'
+        savePath = os.path.join(path, name + '.png')
 
         plt.savefig(savePath)
         
@@ -117,7 +117,6 @@ def visualiseProbabilities(labels, data, path):
 
 
         plt.title(f'Evidence combination for {labels[-1]})', fontsize=15, pad=13)
-            
 
         savePath = path + '\\' + 'combination.png'
 

@@ -175,8 +175,8 @@ class Endpoint:
     
     def deleteEvidence(self, id: str):
 
-        removePath = self.path + '\\' + id + '.png'
-
+        removePath = os.path.join(self.path, id + '.png')
+        
         if id in self.evidence.keys():
             self.evidence.pop(id)
             self.evidenceRaw.pop(id)
