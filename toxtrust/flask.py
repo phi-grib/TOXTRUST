@@ -47,7 +47,10 @@ def callEvidenceInput(endpointName, userEvidence : dict):
     """
     
     e = Endpoint(endpointName)
-    e.load()
+    success, content = e.load()
+    
+    if not success:
+        return False, content
     
     success, message = e.evidenceInput(userEvidence)
     if not success:
@@ -55,6 +58,20 @@ def callEvidenceInput(endpointName, userEvidence : dict):
     
     e.save()
     return True, message
+
+def pathEvidencePlot(endpointName, id : int):
+    
+    e = Endpoint(endpointName)
+    success, content = e.load()
+    
+    if not success:
+        return False, content
+    
+    if id in e.results.keys():
+        path_plot = e.path + '\\' + id + '.png'
+        return True, path_plot
+    else:
+        return False, f'Path for {id} cannot be created'
 
 def removeEvidence(endpointName, id : str):
     

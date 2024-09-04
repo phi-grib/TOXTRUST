@@ -162,15 +162,31 @@ class Endpoint:
                 return False, 'Accessing results failed'
             else: 
                 self.results[identifier] = results
-    
+
+                path = self.path
+                threshold = self.options['decision']['minBelief']
+                
+                success, plot_message = beliefPlausibility(identifier, results, threshold, path)
+                
+                if not success:
+                    return False, plot_message
+  
         return True, message  
     
     def deleteEvidence(self, id: str):
+
+        removePath = self.path + '\\' + id + '.png'
 
         if id in self.evidence.keys():
             self.evidence.pop(id)
             self.evidenceRaw.pop(id)
             self.results.pop(id)
+
+            if os.path.exists(removePath):
+
+                os.remove(removePath)
+            else:
+                return False, 'Image not found'
             
             return True, 'Evidence piece removed'
         else:
@@ -357,22 +373,22 @@ class Endpoint:
             return False, f'Check if results were computed for "{selection}" and make a decision first.'
 
  
-    def probabilityIntervals(self, id: str):
+    # def probabilityIntervals(self, id: str):
         
-        if id in self.results.keys():
-            result = self.results[id]
+    #     if id in self.results.keys():
+    #         result = self.results[id]
 
-        elif id in self.evidence.keys() or id == self.name:
-            return False, f'{id} not yet computed'
-        else:
-            return False, 'Error returning result'
+    #     elif id in self.evidence.keys() or id == self.name:
+    #         return False, f'{id} not yet computed'
+    #     else:
+    #         return False, 'Error returning result'
         
-        path = self.path
-        threshold = self.options['decision']['minBelief']
+    #     path = self.path
+    #     threshold = self.options['decision']['minBelief']
         
-        success, message = beliefPlausibility(id, result, threshold, path)
+    #     success, message = beliefPlausibility(id, result, threshold, path)
         
-        return success, message
+    #     return success, message
  
     def combinationIntervals(self):
         
