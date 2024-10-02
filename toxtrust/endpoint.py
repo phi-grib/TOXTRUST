@@ -5,7 +5,7 @@ import numpy as np
 from toxtrust.config import endpointPath
 from toxtrust.evidence import Evidence
 from toxtrust.combination import Combination
-from toxtrust.visualisation import beliefPlausibility, visualiseProbabilities
+from toxtrust.visualisation import beliefPlausibility, visualiseCombination
 
 class Endpoint:
     
@@ -163,10 +163,10 @@ class Endpoint:
             else: 
                 self.results[identifier] = results
 
-                path = self.path
-                threshold = self.options['decision']['minBelief']
+                # path = self.path
+                # threshold = self.options['decision']['minBelief']
                 
-                success, plot_message = beliefPlausibility(identifier, results, threshold, path)
+                success, plot_message = self.probabilityIntervals(identifier)
                 
                 if not success:
                     return False, plot_message
@@ -190,7 +190,7 @@ class Endpoint:
             
             return True, 'Evidence piece removed'
         else:
-            return False, 'Accessing evidence failed'     
+            return False, 'Accessing evidence failed'      
          
     def decisionInput(self, userDecision: dict):
         
@@ -205,8 +205,9 @@ class Endpoint:
                     decisionDict[key] = value
                 else:
                     return False, 'Decision input not matching the required style' 
-        self.options['decision'] = userDecision    
-        
+        self.options['decision'] = userDecision
+        self.options['combination']['maxUncertainty'] = userDecision['maxUncertainty']
+            
         return True, 'Decision input successfully added'  
     
     def combinationRule(self, userRule: str, factor: str):
@@ -238,17 +239,17 @@ class Endpoint:
             
         return True, message
             
-    def combinationUncertainty(self, userUncertainty):
+    # def combinationUncertainty(self, userUncertainty):
         
-        if type(userUncertainty) == float:
-            self.options['combination']['maxUncertainty'] = userUncertainty
-        elif type(userUncertainty) == int:  
-            userUncertainty = float(userUncertainty)
-            self.options['combination']['maxUncertainty'] = userUncertainty
-        else:
-            return False, 'Uncertainty input not matching the required style' 
+    #     if type(userUncertainty) == float:
+    #         self.options['combination']['maxUncertainty'] = userUncertainty
+    #     elif type(userUncertainty) == int:  
+    #         userUncertainty = float(userUncertainty)
+    #         self.options['combination']['maxUncertainty'] = userUncertainty
+    #     else:
+    #         return False, 'Uncertainty input not matching the required style' 
 
-        return True, 'Uncertainty settings successfully updated' 
+    #     return True, 'Uncertainty settings successfully updated' 
     
     def shouldWoE(self, WoE: bool, weights: list):
         
@@ -321,9 +322,35 @@ class Endpoint:
             success__, result = c.returnResults()
             if not success__:
                 return False, result
+            
+            else:
+                self.results[self.name] = result   
+                
+                success, plot_message = self.combinationIntervals()
+                
+                if not success:
+                    return False, plot_message
 
-            self.results[self.name] = result        
             return True, message_
+    
+    def deleteCombination(self):
+
+        removePath = os.path.join(self.path, 'combination.png')
+        
+        if self.name in self.results.keys():
+            self.results.pop(self.name)
+
+            if os.path.exists(removePath):
+                os.remove(removePath)
+            else:
+                return False, 'Image not found'
+            
+            return True, 'Evidence piece removed'
+        else:
+            return False, 'Accessing evidence failed'       
+        
+            
+        
 
     # def returnCombinationResult(self, selection):
         
@@ -373,22 +400,22 @@ class Endpoint:
             return False, f'Check if results were computed for "{selection}" and make a decision first.'
 
  
-    # def probabilityIntervals(self, id: str):
+    def probabilityIntervals(self, id: str):
         
-    #     if id in self.results.keys():
-    #         result = self.results[id]
+        if id in self.results.keys():
+            result = self.results[id]
 
-    #     elif id in self.evidence.keys() or id == self.name:
-    #         return False, f'{id} not yet computed'
-    #     else:
-    #         return False, 'Error returning result'
+        elif id in self.evidence.keys() or id == self.name:
+            return False, f'{id} not yet computed'
+        else:
+            return False, 'Error returning result'
         
-    #     path = self.path
-    #     threshold = self.options['decision']['minBelief']
+        path = self.path
+        threshold = self.options['decision']['minBelief']
         
-    #     success, message = beliefPlausibility(id, result, threshold, path)
+        success, message = beliefPlausibility(id, result, threshold, path)
         
-    #     return success, message
+        return success, message
  
     def combinationIntervals(self):
         
@@ -407,7 +434,7 @@ class Endpoint:
                 labels = ['combination' if item == self.name else item for item in names]
                 path = self.path
                 
-                success, message = visualiseProbabilities(labels, data, path)
+                success, message = visualiseCombination(labels, data, path)
         
                 return success, message
             

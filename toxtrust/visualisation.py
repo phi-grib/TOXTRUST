@@ -65,7 +65,7 @@ def beliefPlausibility(name, item, threshold, path):
         
         return False, 'Image generation failed'
     
-def visualiseProbabilities(labels, data, path):
+def visualiseCombination(labels, data, path):
 
     # chosen = self.ReturnResults(selection)
     
@@ -118,7 +118,7 @@ def visualiseProbabilities(labels, data, path):
 
         plt.title(f'Evidence combination for {labels[-1]})', fontsize=15, pad=13)
 
-        savePath = path + '\\' + 'combination.png'
+        savePath = os.path.join(path, 'combination.png')
 
         plt.savefig(savePath)
 

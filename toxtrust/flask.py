@@ -1,4 +1,5 @@
 import os
+from toxtrust.config import endpointRepositoryPath, updateConfig
 from toxtrust.endpoint import Endpoint
 
 
@@ -74,6 +75,22 @@ def pathEvidencePlot(endpointName, id : int):
         return True, path_plot
     else:
         return False, f'Path for {id} cannot be created'
+    
+    
+def pathCombinationPlot(endpointName):
+    
+    e = Endpoint(endpointName)
+    success, content = e.load()
+    
+    if not success:
+        return False, content
+    
+    path_plot = os.path.join(e.path, 'combination.png')
+    if os.path.isfile(path_plot):
+        return True, path_plot
+    else:
+        return False, f'Path for combination plot cannot be created'
+     
 
 def removeEvidence(endpointName, id : str):
     
@@ -85,6 +102,22 @@ def removeEvidence(endpointName, id : str):
     e.load()
     
     success, message = e.deleteEvidence(id)
+    if not success:
+        return False, message
+    
+    e.save()
+    return True, message   
+
+def removeCombination(endpointName):
+
+    """"
+    Removes combination results from the yaml file.
+    """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    success, message = e.deleteCombination()
     if not success:
         return False, message
     
@@ -284,7 +317,7 @@ def plotIntervals(endpointName, id: str):
     success, message = e.probabilityIntervals(id)
     return success, message
 
-def plotProbabilities(endpointName): 
+def plotCombination(endpointName): 
     
     """
     Generates a probability plot and stores in the endpoint folder.
@@ -296,7 +329,26 @@ def plotProbabilities(endpointName):
     success, message = e.combinationIntervals()
     return success, message
 
+def updateConfiguration():
+    
+    """
+    Updates configuration settings. 
+    """
 
+    success, message = updateConfig()
+    return success, message
+
+def returnConfiguration():
+    
+    """
+    Returns the configuration path. 
+    """
+    
+    try:  
+        path = endpointRepositoryPath()
+        return True, path
+    except:
+        return False, "Returning path failed"
 
 
 #def returnForDisplay(endpointName, item,threshold=0.5):
