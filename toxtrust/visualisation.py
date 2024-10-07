@@ -32,7 +32,7 @@ def beliefPlausibility(name, item, threshold, path):
         plt.ylim(bottom = -0.15,top=1.15)
         plt.margins(0.45)
 
-        plt.title(f'Probability intervals for "{name}"', fontsize=13, pad=8)
+        plt.title(f'Probability bonds for "{name}"', fontsize=13, pad=8)
 
         font = {'color':  'black',
                 'weight': 'normal',
@@ -57,7 +57,7 @@ def beliefPlausibility(name, item, threshold, path):
         
         savePath = os.path.join(path, name + '.png')
 
-        plt.savefig(savePath)
+        plt.savefig(savePath, transparent=True)
         
         return True, 'Image generation successful'
     
@@ -116,11 +116,11 @@ def visualiseCombination(labels, data, path):
         #     ax.axhline(len(self.ReturnResults('bpa'))-0.5, color ='black', linewidth=0.8, linestyle='--') 
 
 
-        plt.title(f'Evidence combination for {labels[-1]})', fontsize=15, pad=13)
+        plt.title(f'Evidence combination', fontsize=15, pad=13)
 
         savePath = os.path.join(path, 'combination.png')
 
-        plt.savefig(savePath)
+        plt.savefig(savePath, transparent=True)
 
         return True, 'Image generation successful'
 

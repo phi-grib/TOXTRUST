@@ -166,24 +166,24 @@ def selectRule(endpointName, rule = 'auto', factor = 'balance'):
     e.save()
     return True, message
 
-def callCombinationUncertainty(endpointName, combinationUncertainty: float): #, default=True):    # combinationDict = {'inagakiScale': 0.5, 'maxUncertainty': 0.3} 
-                                                                  # pass default settings to this function (dict above)
+# def callCombinationUncertainty(endpointName, combinationUncertainty: float): #, default=True):    # combinationDict = {'inagakiScale': 0.5, 'maxUncertainty': 0.3} 
+#                                                                   # pass default settings to this function (dict above)
     
-    """
-    Function to add combination settings.
-    """
+#     """
+#     Function to add combination settings.
+#     """
     
-    e = Endpoint(endpointName)
-    e.load()
+#     e = Endpoint(endpointName)
+#     e.load()
     
-    success, message = e.combinationUncertainty(combinationUncertainty)
-    if not success:
-        return False, message
+#     success, message = e.combinationUncertainty(combinationUncertainty)
+#     if not success:
+#         return False, message
     
-    e.save()
-    return True, message
+#     e.save()
+#     return True, message
 
-def shouldCombineInput(endpointName, shouldCombine: list): ### THIS NEEDS TO GO BEFORE the next function
+def shouldCombineInput(endpointName, list_to_combine: list): ### THIS NEEDS TO GO BEFORE the next function
     
     """
     Select evidence pieces by IDs to be combiened later.
@@ -192,14 +192,24 @@ def shouldCombineInput(endpointName, shouldCombine: list): ### THIS NEEDS TO GO 
     e = Endpoint(endpointName)
     e.load()
     
-    success, message = e.shoudCombine(shouldCombine)
+    if len(list_to_combine) == 0:
+        return False, 'Evidence pieces for combination not selected'
+    
+    success, message = e.shoudCombine(list_to_combine)
     if not success:
         return False, message
     
+    if e.options['combination']['woe']:
+        weights = []
+        
+        for i in list_to_combine:
+            weights.append(e.evidence[i]['weight'])
+
+        e.options['combination']['weights'] = weights
     e.save()
     return True, message
 
-def shouldWoeInput(endpointName, WoE=False): ## 
+def shouldWoeInput(endpointName, WoE:bool): ## 
 
     """
     Function getting user answer whether Weight of Evidence should be added to evaluating the evidence.
@@ -208,18 +218,18 @@ def shouldWoeInput(endpointName, WoE=False): ##
     e = Endpoint(endpointName)
     e.load()
     
-    weights = []
+    # weights = []
     
-    s = e.options['combination']['shouldCombine']
+    # s = e.options['combination']['shouldCombine']
     
-    if len(s) == 0:
-        return False, 'Evidence pieces for combination not selected'
+    # if len(s) == 0:
+    #     return False, 'Evidence pieces for combination not selected'
     
-    for i in s:
-        weights.append(e.evidence[i]['weight'])
+    # for i in s:
+    #     weights.append(e.evidence[i]['weight'])
     
     
-    success, message = e.shouldWoE(WoE, weights)
+    success, message = e.shouldWoE(WoE)
     if not success:
         return False, message
     

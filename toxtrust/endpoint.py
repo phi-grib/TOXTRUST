@@ -251,17 +251,21 @@ class Endpoint:
 
     #     return True, 'Uncertainty settings successfully updated' 
     
-    def shouldWoE(self, WoE: bool, weights: list):
+    def shouldWoE(self, WoE: bool):
+        
         
         if not type(WoE) == bool:
             return False, 'Wrongly defined input for Weight of Evidence'
+
         else:
             self.options['combination']['woe'] = WoE
-            self.options['combination']['weights'] = weights            
+            #self.options['combination']['weights'] = weights            
             
             if WoE == True:
                 return True, 'Weight of Evidence added to settings'
             else:
+                self.options['combination']['weights'] = []
+                
                 return True, 'Weight of Evidence excluded from settings'
 
     def shoudCombine(self, shouldCombine: list):
@@ -307,8 +311,10 @@ class Endpoint:
         if not options['shouldCombine']:
             return False, 'Evidence pieces for combination not selected'
         else:
-            for num, i in enumerate(options['shouldCombine']): 
-                w =  options['weights'][num]
+            for num, i in enumerate(options['shouldCombine']):
+                
+                if self.options['combination']['woe']:
+                    w =  options['weights'][num]
                 bpm = self.returnResult(i, selection='probabilities')[1]
                 
                 success, message = c.addItem(i, w, bpm)
@@ -420,7 +426,7 @@ class Endpoint:
     def combinationIntervals(self):
         
         if self.name in self.results.keys():
-            names = self.options['combination']['shouldCombine']
+            names = self.options['combination']['shouldCombine'].copy()
 
             if len(names) > 1:
                 names.append(self.name)
