@@ -271,6 +271,7 @@ class Endpoint:
     def shoudCombine(self, shouldCombine: list):
         
         available = []
+        weights = []
         
         if len(shouldCombine) < 2:
             return False, 'Combination not possible, increase the number of evidence pieces'   
@@ -278,10 +279,12 @@ class Endpoint:
             for item in shouldCombine:
                 if item in self.results.keys():
                     available.append(item)
+                    weights.append(self.evidence[item]['weight'])
                 else:
                     return False, f'{item} not available in the provided evidence'
             
         self.options['combination']['shouldCombine'] = available
+        self.options['combination']['weights'] = weights
         
         return True, 'Evidence pieces for combination saved correctly'
 
@@ -313,9 +316,9 @@ class Endpoint:
         else:
             for num, i in enumerate(options['shouldCombine']):
                 
-                if self.options['combination']['woe']:
-                    w =  options['weights'][num]
+                w =  options['weights'][num]
                 bpm = self.returnResult(i, selection='probabilities')[1]
+
                 
                 success, message = c.addItem(i, w, bpm)
                 if not success:
