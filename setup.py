@@ -14,13 +14,10 @@ setup(
     url='https://github.com/phi-grib/TOXTRUST',
     download_url='https://github.com/phi-grib/TOXTRUST.git',
     packages=find_packages(),
+    entry_points={
+        'console_scripts': ['toxtrust=toxtrust.console:main'],
+    },
     # If any package contains *.txt or *.rst files, include them:
     # package_data={'': ['*.yaml', '*.yml']},
     package_data={'toxtrust': ['config.yaml']}
 )
-
-
-from toxtrust.config import updateConfig, endpointRepository
-
-updateConfig()
-endpointRepository()

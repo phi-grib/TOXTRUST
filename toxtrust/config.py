@@ -19,9 +19,23 @@ def readConfig():
         return False, e
 
     if configFile is None:
-        return False, 'Unable to obtain configuration file'
+        return False, 'Unable to obtain configuration file.'
     
     return configFile
+
+def configure():
+    
+    success, message = updateConfig()
+    if success:
+        
+        if os.path.isdir(endpointRepositoryPath()):
+            return True, message
+        else:
+            success, repository_message = endpointRepository()
+            if success:
+                return True, message + " " + repository_message
+            else:
+                return False, repository_message
 
 def updateConfig():
     
@@ -36,7 +50,7 @@ def updateConfig():
         return False, e
 
     if configFile is None:
-        return False, 'Unable to obtain configuration file'
+        return False, 'Unable to obtain configuration file.'
 
     endpoints = os.path.join(source,'endpoints')
 
@@ -46,6 +60,7 @@ def updateConfig():
     try:
         with open(config, 'w') as yaml_file:
             yaml.dump(configFile, yaml_file)
+            return True, 'Configuration updated.'
                 
     except Exception as e:
         return False, e
@@ -65,7 +80,8 @@ def endpointRepository():
     try:
         endpointRepository = endpointRepositoryPath()
         os.mkdir(endpointRepository)
+        return True, "Endpoint repository created."
         
     except:
-        return False, "Creating repository for endpoints failed"
+        return False, "Creating repository for endpoints failed."
 

@@ -119,7 +119,7 @@ def visualiseCombination(labels, data, path):
         plt.title(f'Evidence combination', fontsize=15, pad=13)
 
         savePath = os.path.join(path, 'combination.png')
-
+        
         plt.savefig(savePath, transparent=True)
 
         return True, 'Image generation successful'
