@@ -366,3 +366,16 @@ def returnConfiguration():
     ## return data that enters the visualisation function
     
     #pass 
+    
+
+def returnDataCombinationPlot(endpointName): 
+    
+    """
+    Generates an interval plot and stores in the endpoint folder.
+    """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    success, result = e.dataCombinationPlot()
+    return success, result

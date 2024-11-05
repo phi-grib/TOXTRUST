@@ -324,39 +324,41 @@ class Endpoint:
                 if not success:
                     return False, message
                     
-            success_, message_ = c.executeCombination()       
-            if not success_:
-                return False, message_
+            success_combination, message_combination = c.executeCombination()       
+            if not success_combination:
+                return False, message_combination
                 
-            success__, result = c.returnResults()
-            if not success__:
+            success_results, result = c.returnResults()
+            
+            if not success_results:
                 return False, result
             
             else:
-                self.results[self.name] = result   
+                self.results[self.name] = result   ## 
+                #return True, message_
                 
-                success, plot_message = self.combinationIntervals()
+                # success, plot_message = self.combinationIntervals()
                 
-                if not success:
-                    return False, plot_message
+                # if not success:
+                #     return False, plot_message
 
-            return True, message_
+            return True, message_combination
     
     def deleteCombination(self):
 
-        removePath = os.path.join(self.path, 'combination.png')
+        #removePath = os.path.join(self.path, 'combination.png')
         
         if self.name in self.results.keys():
             self.results.pop(self.name)
 
-            if os.path.exists(removePath):
-                os.remove(removePath)
-            else:
-                return False, 'Image not found'
+            # if os.path.exists(removePath):
+            #     os.remove(removePath)
+            # else:
+            #     return False, 'Image not found'
             
-            return True, 'Evidence piece removed'
+            return True, 'Combination result removed'
         else:
-            return False, 'Accessing evidence failed'       
+            return False, 'Accessing combination result failed'       
         
             
         
@@ -425,6 +427,26 @@ class Endpoint:
         success, message = beliefPlausibility(id, result, threshold, path)
         
         return success, message
+ 
+    def dataCombinationPlot(self):
+        
+        if self.name in self.results.keys():
+            names = self.options['combination']['shouldCombine'].copy()
+
+            if len(names) > 1:
+                names.append(self.name)
+                data = []
+                for n in names:
+                    values = self.results[n]['probabilities'].values()
+                    data.append(list(values))
+                
+                data = np.array(data)
+                labels = ['Combination' if item == self.name else item for item in names]
+                #path = self.path
+                
+            return True, [data, labels]
+        else:
+            return False, 'Data access failed'
  
     def combinationIntervals(self):
         
