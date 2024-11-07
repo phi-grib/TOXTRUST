@@ -166,10 +166,14 @@ class Endpoint:
                 # path = self.path
                 # threshold = self.options['decision']['minBelief']
                 
-                success, plot_message = self.probabilityIntervals(identifier)
-                
+                success, decision_message = self.makeDecision(identifier)
                 if not success:
-                    return False, plot_message
+                    return False, decision_message
+                
+                # success, plot_message = self.probabilityIntervals(identifier)
+                
+                # if not success:
+                #     return False, plot_message
   
         return True, message  
     
@@ -181,6 +185,7 @@ class Endpoint:
             self.evidence.pop(id)
             self.evidenceRaw.pop(id)
             self.results.pop(id)
+            self.decisions.pop(id)
 
             if os.path.exists(removePath):
 
@@ -310,7 +315,7 @@ class Endpoint:
         options = self.options['combination']
         
         c = Combination(options)
-        
+        identifier = self.name
         if not options['shouldCombine']:
             return False, 'Evidence pieces for combination not selected'
         else:
@@ -334,8 +339,12 @@ class Endpoint:
                 return False, result
             
             else:
-                self.results[self.name] = result   ## 
-                #return True, message_
+                self.results[identifier] = result   ## 
+                
+                success, decision_message = self.makeDecision(identifier)
+                if not success:
+                    return False, decision_message
+                
                 
                 # success, plot_message = self.combinationIntervals()
                 
@@ -350,6 +359,7 @@ class Endpoint:
         
         if self.name in self.results.keys():
             self.results.pop(self.name)
+            self.decisions.pop(self.name)
 
             # if os.path.exists(removePath):
             #     os.remove(removePath)
@@ -440,7 +450,7 @@ class Endpoint:
                     values = self.results[n]['probabilities'].values()
                     data.append(list(values))
                 
-                data = np.array(data)
+                data = np.array(data).tolist()
                 labels = ['Combination' if item == self.name else item for item in names]
                 #path = self.path
                 
