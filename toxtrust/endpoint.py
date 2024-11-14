@@ -434,7 +434,7 @@ class Endpoint:
         threshold = self.options['decision']['minBelief']
         
         data_bounds = {'Negative': round(result['belief']['negative'] + (result['plausibility']['negative'] - result['belief']['negative'])/2,2),'Positive': round(result['belief']['positive'] + (result['plausibility']['positive'] - result['belief']['positive'])/2,2)}
-        error = result['probabilities']['uncertain']/2 # assuming equal ledatael of ignorance for each prediction from a constant source
+        error = round(result['probabilities']['uncertain']/2,2) # assuming equal ledatael of ignorance for each prediction from a constant source
         
         labels, data = [], []
 
