@@ -367,6 +367,18 @@ def returnConfiguration():
     
     #pass 
     
+def returnDataErrorPlot(endpointName, id:str): 
+    
+    """
+    Generates an interval plot and stores in the endpoint folder.
+    """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    success, result = e.dataErrorPlot(id)
+    return success, result
+    
 
 def returnDataCombinationPlot(endpointName): 
     

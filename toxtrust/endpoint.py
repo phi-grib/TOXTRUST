@@ -419,6 +419,35 @@ class Endpoint:
             return True, decision
         else:
             return False, f'Check if results were computed for "{selection}" and make a decision first.'
+        
+        
+    def dataErrorPlot(self, id: str):
+        
+        if id in self.results.keys():
+            result = self.results[id]
+
+        elif id in self.evidence.keys() or id == self.name:
+            return False, f'{id} not yet computed'
+        else:
+            return False, 'Error returning result'
+
+        threshold = self.options['decision']['minBelief']
+        
+        data_bounds = {'Negative': round(result['belief']['negative'] + (result['plausibility']['negative'] - result['belief']['negative'])/2,2),'Positive': round(result['belief']['positive'] + (result['plausibility']['positive'] - result['belief']['positive'])/2,2)}
+        error = result['probabilities']['uncertain']/2 # assuming equal ledatael of ignorance for each prediction from a constant source
+        
+        labels, data = [], []
+
+        for key, value in data_bounds.items():
+
+            if value != 0:
+
+                labels.append(key)
+                data.append(value)
+                
+            return True, [labels, data, error, threshold]
+        else:
+            return False, 'Data access failed'
 
  
     def probabilityIntervals(self, id: str):
