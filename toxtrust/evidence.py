@@ -108,7 +108,7 @@ class Evidence:
             return True, 1
 
     def check_source(self, value):
-        return value in ['qsar','expert','in vitro', 'alert'], value
+        return value in ['in silico','in vitro','expert', 'alert'], value
     
     def check_relevance(self, value):
         if value != None:

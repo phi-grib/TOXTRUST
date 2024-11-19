@@ -94,7 +94,7 @@ class Endpoint:
         }
         
         with open(template,'w') as f:
-            f.write(yaml.dump(templateDict))
+            f.write(yaml.dump(templateDict, sort_keys=False))
 
     def getVal(self, key):
         
@@ -147,7 +147,7 @@ class Endpoint:
             return False, message
     
         success, evidence = i.returnEvidence()
-        
+
         if not success:
             return False, 'Accessing evidence failed'     
         else: 
@@ -157,7 +157,6 @@ class Endpoint:
             self.evidenceRaw[identifier] = userInput
             
             success_, results = i.returnResults()
-            
             if not success_:
                 return False, 'Accessing results failed'
             else: 
@@ -480,7 +479,7 @@ class Endpoint:
                     data.append(list(values))
                 
                 data = np.array(data).tolist()
-                labels = ['Combination' if item == self.name else item for item in names]
+                labels = ['DST' if item == self.name else item for item in names]
                 #path = self.path
                 
             return True, [data, labels]
