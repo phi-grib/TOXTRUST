@@ -70,6 +70,20 @@ def listEndpoints():
     listEndpoints = os.listdir(endpointRepositoryPath())
     
     return listEndpoints
+
+
+def listEndpointsDetails():
+    
+    listEndpoints = os.listdir(endpointRepositoryPath())
+    info = []
+    
+    for end in listEndpoints:
+        e = Endpoint(end)
+        e.load()
+        
+        info.append({'name': e.endpoint['compound'],'framework': e.endpoint['framework'],'confidentiality':e.endpoint['confidentiality']})
+        
+    return info
     
 def generateId(size=10, chars=string.ascii_uppercase + string.digits):
     '''
