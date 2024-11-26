@@ -415,7 +415,7 @@ class Endpoint:
         
         if selection in self.decisions.keys():
             decision = self.decisions[selection]
-            return True, decision.capitalize()
+            return True, decision
         else:
             return False, f'Check if results were computed for "{selection}" and make a decision first.'
         

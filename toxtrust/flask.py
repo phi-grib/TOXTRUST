@@ -133,6 +133,16 @@ def returnEvidenceInput(endpointName):
     
     return True, e.evidenceRaw
 
+def returnEndpointInfo(endpointName):
+    
+    """ Returns added evidence to the yaml file. """
+    
+    e = Endpoint(endpointName)
+    e.load()
+    
+    return True, e.endpoint
+
+
 def callDecisionInput(endpointName, userDecision : dict):   #### ask whether the user wants to keep defaults or not
     
     """
