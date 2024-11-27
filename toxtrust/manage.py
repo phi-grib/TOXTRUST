@@ -81,7 +81,7 @@ def listEndpointsDetails():
         e = Endpoint(end)
         e.load()
         
-        info.append({'name': e.endpoint['compound'],'framework': e.endpoint['framework'],'confidentiality':e.endpoint['confidentiality']})
+        info.append({'name': e.name,'compound': e.endpoint['compound'],'framework': e.endpoint['framework'],'confidentiality':e.endpoint['confidentiality']})
         
     return info
     
