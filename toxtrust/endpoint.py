@@ -214,7 +214,7 @@ class Endpoint:
             
         return True, 'Decision input successfully added'  
     
-    def combinationRule(self, userRule: str, factor: str):
+    def combinationRule(self, userRule: str, factor: float):
         
         if userRule not in ['auto', 'Dempster', 'Yager', 'Inagaki']:
             return False, f'Rule "{userRule}" not available'
@@ -225,13 +225,11 @@ class Endpoint:
             message = 'Rule selection successfully completed'  
             
             if userRule == 'Inagaki':
-                
-                scaleDict = {'fullDecision': 1, 'partialDecision': 0.75, 'balance':0.5, 'partialUncertainty':0.25, 'fullUncertainty': 0}
-                
-                if factor not in scaleDict.keys():
-                    return False, 'Inagaki factor incorrect'
+
+                if not 0 <= factor <= 1:
+                    return False, 'Inagaki factor is outside the range [0,1]'
                 else:
-                    self.options['combination']['inagakiScale'] = scaleDict[factor]
+                    self.options['combination']['inagakiScale'] = factor
                     
                 message += ', Inagaki factor considered'  
         else:

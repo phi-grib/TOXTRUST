@@ -160,7 +160,7 @@ def callDecisionInput(endpointName, userDecision : dict):   #### ask whether the
     e.save()
     return True, message
 
-def selectRule(endpointName, rule = 'auto', factor = 'balance'):
+def selectRule(endpointName, rule = 'auto', factor = 0.5):
     
     """
     Function to define the combination rule.
