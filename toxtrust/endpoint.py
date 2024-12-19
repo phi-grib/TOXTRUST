@@ -444,10 +444,7 @@ class Endpoint:
                 labels.append(key)
                 data.append(value)
                 
-            return True, [labels, data, error, threshold]
-        else:
-            return False, 'Data access failed'
-
+        return True, [labels, data, error, threshold]
  
     def probabilityIntervals(self, id: str):
         
