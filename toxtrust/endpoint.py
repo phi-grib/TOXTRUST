@@ -178,7 +178,7 @@ class Endpoint:
     
     def deleteEvidence(self, id: str):
 
-        removePath = os.path.join(self.path, id + '.png')
+        #removePath = os.path.join(self.path, id + '.png')
         
         if id in self.evidence.keys():
             self.evidence.pop(id)
@@ -186,11 +186,11 @@ class Endpoint:
             self.results.pop(id)
             self.decisions.pop(id)
 
-            if os.path.exists(removePath):
+            # if os.path.exists(removePath):
 
-                os.remove(removePath)
-            else:
-                return False, 'Image not found'
+            #     os.remove(removePath)
+            # else:
+            #     return False, 'Image not found'
             
             return True, 'Evidence piece removed'
         else:
@@ -479,10 +479,10 @@ class Endpoint:
                     data.append(list(values))
                 
                 data = np.array(data).tolist()
-                labels = ['DST' if item == self.name else item for item in names]
+                #labels = ['DST' if item == self.name else item for item in names]
                 #path = self.path
                 
-            return True, [data, labels]
+            return True, [data, names]
         else:
             return False, 'Data access failed'
  
